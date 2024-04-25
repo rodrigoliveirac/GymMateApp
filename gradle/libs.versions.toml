@@ -16,6 +16,12 @@ retrofit = "2.9.0"
 navigation = "2.7.7"
 hiltNavCompose = "1.2.0"
 firebaseBom = "32.8.1"
+mockito = "5.11.0"
+kotlinxCoroutinesTest = "1.8.1-Beta"
+gmsGoogleServices = "4.4.0"
+hiltTest = "2.49"
+mockitoKotlin = "5.3.1"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -40,12 +46,18 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation"}
 navigation-compose-hilt = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavCompose" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom"}
-firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
-firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
-firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
+mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito"}
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin"}
+
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+dagger-hilt-test = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hiltTest"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 devtoolsKsp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 daggerHiltPlugin = { id = "com.google.dagger.hilt.android", version.ref = "hiltCompiler" }
+gmsGoogleServices = { id = "com.google.gms.google-services", version.ref = "gmsGoogleServices" }

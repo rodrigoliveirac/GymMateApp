@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.devtoolsKsp)
     alias(libs.plugins.daggerHiltPlugin)
+    alias(libs.plugins.gmsGoogleServices)
 }
 
 android {
@@ -16,9 +17,15 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.rodcollab.gymmateapp.GymMateTestRunner"
+
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+    testOptions {
+        unitTests {
+            unitTests.isReturnDefaultValues = true
         }
     }
 
@@ -62,6 +69,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
+    testImplementation("org.testng:testng:6.9.6")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -85,4 +93,11 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
+
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
+
+    testImplementation(libs.coroutines.test)
+
+    androidTestImplementation(libs.dagger.hilt.test)
 }

@@ -4,4 +4,5 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid) apply false
     alias(libs.plugins.devtoolsKsp) apply false
     alias(libs.plugins.daggerHiltPlugin) apply false
+    alias(libs.plugins.gmsGoogleServices) apply false
 }
