@@ -4,13 +4,14 @@ import com.rodcollab.gymmateapp.core.ResultOf
 import java.util.regex.Pattern
 
 class EmailAndPasswordValidatorImpl : EmailAndPasswordValidator {
-    override fun invoke(email: String, password: String, onResult: (ResultOf<Boolean>) -> Unit) {
+    override suspend fun invoke(email: String, password: String, onResult: suspend (ResultOf<Boolean>) -> Unit) {
         try {
             checkIfEmailIsValid(email)
             checkIfPasswordIsValid(password)
         } catch (e: Exception) {
             onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
         }
+        onResult(ResultOf.Success(true))
     }
 
     private fun checkIfEmailIsValid(email: String) {

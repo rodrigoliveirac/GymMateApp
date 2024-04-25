@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 
 open class FakeAuthRepository : AuthRepository {
 
-    val users = mutableListOf(User(uuid = 0.toString(),email = "shadow@gmail.com", password = "1112", username = "shadow"))
+    val users = mutableListOf(User(uuid = 0.toString(),email = "shadow@gmail.com", password = "123456", username = "shadow"))
 
     override suspend fun signInWithEmailAndPassword(email: String, password: String, onResult: (ResultOf<User>) -> Unit) {
         withContext(Dispatchers.IO) {
