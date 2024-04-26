@@ -1,10 +1,11 @@
 package com.rodcollab.gymmateapp.auth.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodcollab.gymmateapp.auth.domain.model.AuthDomain
 import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
-import com.rodcollab.gymmateapp.auth.presentation.intent.LoginUiAction
+import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
 import com.rodcollab.gymmateapp.core.ResultOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -16,48 +17,56 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val authDomain: AuthDomain) : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val authDomain: AuthDomain,
+    private val savedStateHandle: SavedStateHandle,
+) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<LoginUiState> = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+    private val _uiState: MutableStateFlow<AuthUiState> = MutableStateFlow(AuthUiState())
+    val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    fun onLoginUiAction(action: LoginUiAction, toMainScreen: () -> Unit = {}) {
+    fun onAuthUiAction(action: AuthUiAction, toMainScreen: () -> Unit = {}) {
         viewModelScope.launch(Dispatchers.Default) {
             when(action) {
-                is LoginUiAction.OnEmailValueChange -> {
+                is AuthUiAction.OnEmailValueChange -> {
                     _uiState.update { currentUiState ->
                         currentUiState.copy(email = action.email)
                     }
                 }
-                is LoginUiAction.OnPasswordValueChange -> {
+                is AuthUiAction.OnPasswordValueChange -> {
                     _uiState.update { currentUiState ->
                         currentUiState.copy(email = action.password)
                     }
                 }
-                is LoginUiAction.OnLoginClick -> {
+                is AuthUiAction.OnConfirmClick -> {
                     _uiState.update { currentUiState ->
                         currentUiState.copy(resultOf = ResultOf.Idle)
                     }
                     _uiState.value.apply {
-                        authDomain.authenticate(
-                            email = email,
-                            password = password,
-                            signPath = SignPath.SIGN_IN,
-                            onResult = { resultOf ->
-                                _uiState.update { currentUiState ->
-                                    currentUiState.copy(resultOf = resultOf)
+                        savedStateHandle.get<String>(SIGN_PATH)?.let { signPath ->
+                            authDomain.authenticate(
+                                email = email,
+                                password = password,
+                                signPath = SignPath.valueOf(signPath),
+                                onResult = { resultOf ->
+                                    _uiState.update { currentUiState ->
+                                        currentUiState.copy(resultOf = resultOf)
+                                    }
+                                    toMainScreen()
                                 }
-                                toMainScreen()
-                            }
-                        )
+                            )
+                        }
                     }
                 }
-                is LoginUiAction.OnShowPasswordClick -> {
+                is AuthUiAction.OnShowPasswordClick -> {
                     _uiState.update { currentUiState ->
                         currentUiState.copy(showPassword = !currentUiState.showPassword)
                     }
                 }
             }
         }
+    }
+    companion object {
+        private val SIGN_PATH = "SIGN_PATH"
     }
 }

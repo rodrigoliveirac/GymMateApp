@@ -2,7 +2,7 @@ package com.rodcollab.gymmateapp.auth.presentation
 
 import com.rodcollab.gymmateapp.auth.domain.model.AuthDomain
 import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
-import com.rodcollab.gymmateapp.auth.presentation.intent.LoginUiAction
+import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
 import com.rodcollab.gymmateapp.core.ResultOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -12,28 +12,40 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-class LoginUiModel(dispatcherProvider: CoroutineDispatcher, private val authDomain: AuthDomain) : CoroutineScope  {
+class FakeSavedStateHandle : HashMap<String, String>() {
 
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val storage: HashMap<String, String> = hashMapOf()
+    override fun get(key: String): String? {
+        return storage[key]
+    }
+
+    override fun put(key: String, value: String): String? {
+        return storage.put(key,value)
+    }
+
+}
+class AuthUiModel(dispatcherProvider: CoroutineDispatcher, private val authDomain: AuthDomain, private val fakeSavedStateHandle: FakeSavedStateHandle) : CoroutineScope  {
+
+    private val _uiState = MutableStateFlow(AuthUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun onLoginUiAction(action: LoginUiAction, toMainScreen: ()-> Unit = {}) {
+    fun onAuthUiAction(action: AuthUiAction, toMainScreen: ()-> Unit = {}) {
         launch {
             when(action) {
-                is LoginUiAction.OnEmailValueChange -> {
+                is AuthUiAction.OnEmailValueChange -> {
                         updateWith(_uiState.value.copy(email = _uiState.value.email + action.email))
                 }
-                is LoginUiAction.OnPasswordValueChange -> {
+                is AuthUiAction.OnPasswordValueChange -> {
                     updateWith(_uiState.value.copy(password = action.password))
                 }
-                is LoginUiAction.OnLoginClick -> {
-                    launch {
-                        updateWith(_uiState.value.copy(resultOf = ResultOf.Idle))
-                        _uiState.value.apply {
+                is AuthUiAction.OnConfirmClick -> {
+                    updateWith(_uiState.value.copy(resultOf = ResultOf.Idle))
+                    _uiState.value.apply {
+                        fakeSavedStateHandle[SIGN_PATH]?.let { signPath ->
                             authDomain.authenticate(
                                 email = email,
                                 password = password,
-                                signPath = SignPath.SIGN_IN,
+                                signPath = SignPath.valueOf(signPath),
                                 onResult = { resultOf ->
                                     updateWith(_uiState.value.copy(resultOf = resultOf))
                                     toMainScreen()
@@ -42,7 +54,7 @@ class LoginUiModel(dispatcherProvider: CoroutineDispatcher, private val authDoma
                         }
                     }
                 }
-                is LoginUiAction.OnShowPasswordClick -> {
+                is AuthUiAction.OnShowPasswordClick -> {
                     launch {
                         _uiState.update {
                             it.copy(showPassword = !_uiState.value.showPassword)
@@ -53,7 +65,10 @@ class LoginUiModel(dispatcherProvider: CoroutineDispatcher, private val authDoma
         }
     }
 
-    private fun updateWith(newState: LoginUiState) {
+    companion object {
+        const val SIGN_PATH = "SIGN_PATH"
+    }
+    private fun updateWith(newState: AuthUiState) {
         _uiState.value = newState
         println("new state $newState")
     }
