@@ -36,7 +36,7 @@ open class FakeAuthRepository : AuthRepository {
     ) {
         withContext(Dispatchers.IO) {
             try {
-                val user = users.find { it.email == email }
+                val user = users.find { it.email?.contains(email) == true }
 
                 user?.let {
                     val exception = IllegalArgumentException("User already Exist")
