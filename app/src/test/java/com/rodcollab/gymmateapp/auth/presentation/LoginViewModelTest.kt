@@ -23,7 +23,8 @@ import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LoginViewModelTest {
+class
+LoginViewModelTest {
 
     private lateinit var authDomain: AuthDomain
     private lateinit var userSignIn: UserAuth

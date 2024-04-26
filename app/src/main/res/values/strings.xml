@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">GymMate</string>
+    <string name="sign_in">Sign In</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_login_text_button">LOGIN</string>
+    <string name="auth_create_account_text_button">Create account</string>
+    <string name="auth_email_placeholder">user@gmail.com</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_password_placeholder">somepassword</string>
+    <string name="auth_welcome_text">Welcome to GymMate!</string>
 </resources>

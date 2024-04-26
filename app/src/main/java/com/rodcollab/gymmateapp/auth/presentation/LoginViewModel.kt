@@ -35,7 +35,7 @@ class LoginViewModel @Inject constructor(
                 }
                 is AuthUiAction.OnPasswordValueChange -> {
                     _uiState.update { currentUiState ->
-                        currentUiState.copy(email = action.password)
+                        currentUiState.copy(password = action.password)
                     }
                 }
                 is AuthUiAction.OnConfirmClick -> {
@@ -43,11 +43,12 @@ class LoginViewModel @Inject constructor(
                         currentUiState.copy(resultOf = ResultOf.Idle)
                     }
                     _uiState.value.apply {
-                        savedStateHandle.get<String>(SIGN_PATH)?.let { signPath ->
+                        val signPath = savedStateHandle.get<String>(SIGN_PATH) ?: "SIGN_IN"
+                        signPath.let {
                             authDomain.authenticate(
                                 email = email,
                                 password = password,
-                                signPath = SignPath.valueOf(signPath),
+                                signPath = SignPath.valueOf(it),
                                 onResult = { resultOf ->
                                     _uiState.update { currentUiState ->
                                         currentUiState.copy(resultOf = resultOf)

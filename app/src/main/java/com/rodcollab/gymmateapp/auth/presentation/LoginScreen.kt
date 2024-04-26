@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -26,35 +25,53 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rodcollab.gymmateapp.R
+import com.rodcollab.gymmateapp.auth.presentation.components.AuthMainComponent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    viewModel: LoginViewModel = hiltViewModel(),
+    toSignUpPath: () -> Unit
+) {
+
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text(text = "Sign In") })
+            CenterAlignedTopAppBar(modifier = Modifier.shadow(elevation = 6.dp),title = { Text(text = stringResource(
+                R.string.sign_in
+            )
+            ) })
         }
     ) { paddingValues ->
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)) {
-            Column {
-                Image(painter = painterResource(id = R.drawable.ic_logo), contentDescription = null)
+            uiState.apply {
+                AuthMainComponent(
+                    email = email,
+                    password = password,
+                    showPassword = showPassword,
+                    toSignUpPath = toSignUpPath
+                ) { uiAction -> viewModel.onAuthUiAction(uiAction)  }
             }
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
