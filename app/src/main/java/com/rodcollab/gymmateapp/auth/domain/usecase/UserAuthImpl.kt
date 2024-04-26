@@ -2,6 +2,7 @@ package com.rodcollab.gymmateapp.auth.domain.usecase
 
 import com.rodcollab.gymmateapp.auth.data.AuthRepository
 import com.rodcollab.gymmateapp.auth.domain.model.User
+import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
 import com.rodcollab.gymmateapp.core.ResultOf
 
 class UserAuthImpl(

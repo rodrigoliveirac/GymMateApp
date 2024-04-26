@@ -5,7 +5,7 @@ import com.rodcollab.gymmateapp.auth.data.AuthRepository
 import com.rodcollab.gymmateapp.auth.domain.model.User
 import com.rodcollab.gymmateapp.auth.domain.usecase.EmailAndPasswordValidator
 import com.rodcollab.gymmateapp.auth.domain.usecase.EmailAndPasswordValidatorImpl
-import com.rodcollab.gymmateapp.auth.domain.usecase.SignPath
+import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
 import com.rodcollab.gymmateapp.auth.domain.usecase.UserAuth
 import com.rodcollab.gymmateapp.auth.domain.usecase.UserAuthImpl
 import com.rodcollab.gymmateapp.core.ResultOf
