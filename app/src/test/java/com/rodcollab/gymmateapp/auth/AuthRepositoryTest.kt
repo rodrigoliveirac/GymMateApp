@@ -28,7 +28,7 @@ class AuthRepositoryImplTest {
         val email = "rodrigo@gmail.com"
         val password = "12345"
 
-        val exception = NullPointerException()
+        val exception = NullPointerException("User not found")
 
         val resultOfFailure: ResultOf<User> = ResultOf.Failure(message = exception.message, throwable = exception.cause)
 

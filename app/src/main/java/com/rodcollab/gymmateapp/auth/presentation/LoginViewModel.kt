@@ -67,6 +67,6 @@ class LoginViewModel @Inject constructor(
         }
     }
     companion object {
-        private val SIGN_PATH = "SIGN_PATH"
+        private const val SIGN_PATH = "SIGN_PATH"
     }
 }
