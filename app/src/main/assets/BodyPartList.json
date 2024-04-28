@@ -1,3 +1,40 @@
 {
-  "bodyPartList" : ["waist","chest","biceps","calves","shoulders","back","triceps","traps","upper legs"]
+  "bodyPartList": [
+    {
+      "name": "waist",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/abs_0.jpg"
+    },
+    {
+      "name": "chest",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/chest.jpg"
+    },
+    {
+      "name": "biceps",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/biceps_0.jpg"
+    },
+    {
+      "name": "calves",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/calves_0.jpg"
+    },
+    {
+      "name": "shoulders",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/shoulders_0.jpg"
+    },
+    {
+      "name": "back",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/upperback.jpg"
+    },
+    {
+      "name": "triceps",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/triceps.jpg"
+    },
+    {
+      "name": "traps",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/trap.jpg"
+    },
+    {
+      "name": "upper legs",
+      "url": "https://www.hipertrofia.org/blog/wp-content/uploads/2020/04/pernas.jpg"
+    }
+  ]
 }

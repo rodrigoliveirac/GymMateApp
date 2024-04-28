@@ -7,7 +7,7 @@ import com.rodcollab.gymmateapp.exercises.data.ExercisesRepository
 import javax.inject.Inject
 
 class ExercisesByBPImpl @Inject constructor(private val exercises: ExercisesRepository) : ExercisesByBP {
-    override suspend fun invoke(bodyPart: String, onResult: (ResultOf<Map<BodyPart,Exercise>>) -> Unit) {
+    override suspend fun invoke(onResult: (ResultOf<Map<BodyPart,Exercise>>) -> Unit) {
         try {
             val bodyPartWithExercises = hashMapOf<BodyPart,Exercise>()
             exercises.getBodyParts().map { bp ->

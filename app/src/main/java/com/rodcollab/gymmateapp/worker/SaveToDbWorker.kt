@@ -36,7 +36,10 @@ class CoroutineDownloadWorker(
                         var count = 0
                         val list = mutableListOf<BodyPart>()
                         while (jsonArray.length() != count) {
-                            list.add(BodyPart(name = jsonArray[count] as String))
+                            val bodyPart = jsonArray[count] as JSONObject
+                            val name = bodyPart.getString("name")
+                            val url = bodyPart.getString("url")
+                            list.add(BodyPart(name = name, imgUrl = url))
                             count++
                         }
                         list
