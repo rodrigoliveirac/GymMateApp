@@ -4,14 +4,17 @@ import com.rodcollab.gymmateapp.core.ResultOf
 import java.util.regex.Pattern
 
 class EmailAndPasswordValidatorImpl : EmailAndPasswordValidator {
-    override suspend fun invoke(email: String, password: String, onResult: suspend (ResultOf<Boolean>) -> Unit) {
+    override suspend fun invoke(email: String, password: String, repeatPassword: String?, onResult: suspend (ResultOf<Boolean>) -> Unit) {
         try {
             checkIfEmailIsValid(email)
             checkIfPasswordIsValid(password)
+            repeatPassword?.let {
+                checkIfPasswordsAreTheSame(password = password, repeatPassword = it)
+            }
+            onResult(ResultOf.Success(true))
         } catch (e: Exception) {
             onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
         }
-        onResult(ResultOf.Success(true))
     }
 
     private fun checkIfEmailIsValid(email: String) {
@@ -25,6 +28,12 @@ class EmailAndPasswordValidatorImpl : EmailAndPasswordValidator {
         val isValid = password.length >= 6
         if(!isValid) {
             throw RuntimeException("Password should have at least 6 characters")
+        }
+    }
+
+    private fun checkIfPasswordsAreTheSame(password: String, repeatPassword: String) {
+        if(repeatPassword != password) {
+            throw RuntimeException("The passwords should be the same")
         }
     }
 }

@@ -8,7 +8,6 @@ import com.rodcollab.gymmateapp.auth.domain.usecase.EmailAndPasswordValidator
 import com.rodcollab.gymmateapp.auth.domain.usecase.EmailAndPasswordValidatorImpl
 import com.rodcollab.gymmateapp.auth.domain.usecase.UserAuth
 import com.rodcollab.gymmateapp.auth.domain.usecase.UserAuthImpl
-import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
 import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
 import com.rodcollab.gymmateapp.core.ResultOf
 import junit.framework.TestCase
@@ -208,8 +207,8 @@ LoginViewModelTest {
     }
 
     companion object {
-        private val signInPath = SignPath.SIGN_IN.name
-        private val signUpPath = SignPath.SIGN_UP.name
+        private val signInPath = "SIGN_IN"
+        private val signUpPath = "SIGN_UP"
         private val SIGN_PATH = "SIGN_PATH"
     }
 

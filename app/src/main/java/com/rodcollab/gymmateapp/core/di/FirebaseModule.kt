@@ -1,4 +1,4 @@
-package com.rodcollab.gymmateapp.core
+package com.rodcollab.gymmateapp.core.di
 
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth

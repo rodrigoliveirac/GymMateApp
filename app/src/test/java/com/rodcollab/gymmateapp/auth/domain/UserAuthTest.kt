@@ -32,7 +32,7 @@ class UserAuthTest {
     fun `test User SignIn business logic when is Failure cause the user is not registered`() = runTest {
         val email = "rod@gmail.com"
         val password = "123456"
-        userSignIn(email = email,password = password, signPath = SignPath.SIGN_IN) { resultOf ->
+        userSignIn(email = email,password = password, repeatPassword = null, signPath = SignPath.SignIn()) { resultOf ->
             assertTrue(resultOf is ResultOf.Failure)
             TestCase.assertEquals("User not found", (resultOf as ResultOf.Failure).message)
         }
@@ -42,7 +42,7 @@ class UserAuthTest {
         val email = "shadow@gmail.com"
         val password = "123456"
         val userExpected = User(uuid = 0.toString(),email = "shadow@gmail.com", password = "123456", username = "shadow")
-        userSignIn(email = email,password = password, signPath = SignPath.SIGN_IN) { resultOf ->
+        userSignIn(email = email,password = password, repeatPassword = null, signPath = SignPath.SignIn()) { resultOf ->
             assertTrue(resultOf is ResultOf.Success)
             TestCase.assertEquals(ResultOf.Success(userExpected), resultOf)
         }
@@ -52,7 +52,8 @@ class UserAuthTest {
     fun `test User SignUp business logic when is Failure cause the user email already exist`() = runTest {
         val email = "shadow@gmail.com"
         val password = "123456"
-        userSignIn(email = email,password = password, signPath = SignPath.SIGN_UP) { resultOf ->
+        val repeatPassword = password
+        userSignIn(email = email,password = password, repeatPassword = repeatPassword, signPath = SignPath.SignUp()) { resultOf ->
             assertTrue(resultOf is ResultOf.Failure)
             TestCase.assertEquals("User already Exist", (resultOf as ResultOf.Failure).message)
         }
@@ -61,6 +62,7 @@ class UserAuthTest {
     fun `test User SignUp business logic when is Success`() = runTest {
         val email = "shalow@gmail.com"
         val password = "123456"
+        val repeatPassword = password
         val fakeAuthRepository = authRepository as FakeAuthRepository
         val uuid = (fakeAuthRepository.users.last().uuid?.toInt()?.plus(1)).toString()
         val newUserExpected = User(
@@ -69,7 +71,7 @@ class UserAuthTest {
             email = email,
             password = password
         )
-        userSignIn(email = email,password = password, signPath = SignPath.SIGN_UP) { resultOf ->
+        userSignIn(email = email,password = password, repeatPassword = repeatPassword, signPath = SignPath.SignUp()) { resultOf ->
             assertTrue(resultOf is ResultOf.Success)
             TestCase.assertEquals(ResultOf.Success(newUserExpected), resultOf)
         }

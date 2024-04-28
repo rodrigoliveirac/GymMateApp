@@ -23,6 +23,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,7 +36,16 @@ import com.rodcollab.gymmateapp.R
 import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
 
 @Composable
-fun AuthMainComponent(email: String, password:String, showPassword: Boolean, toSignUpPath: () -> Unit, onAuthUiAction: (AuthUiAction)-> Unit) {
+fun AuthMainComponent(
+    displayToSignUpBtn: Boolean,
+    confirmBtnText: Int,
+    headlineScreen: Int,
+    email: String,
+    password: String,
+    repeatPassword: String?,
+    showPassword: Boolean,
+    onAuthUiAction: (AuthUiAction) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,13 +56,14 @@ fun AuthMainComponent(email: String, password:String, showPassword: Boolean, toS
         Image(
             modifier = Modifier.clip(CircleShape),
             painter = painterResource(id = R.drawable.ic_logo),
-            contentDescription = null)
+            contentDescription = null
+        )
         Spacer(modifier = Modifier.size(16.dp))
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.headlineMedium,
-            text = stringResource(R.string.auth_welcome_text)
+            text = stringResource(headlineScreen)
         )
         Spacer(modifier = Modifier.size(16.dp))
         TextField(
@@ -73,18 +84,50 @@ fun AuthMainComponent(email: String, password:String, showPassword: Boolean, toS
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = null) },
-            trailingIcon = { IconButton(onClick = { onAuthUiAction(AuthUiAction.OnShowPasswordClick) }) {
-                Icon(painter = painterResource(id = if(showPassword) R.drawable.ic_eye_close else R.drawable.ic_eye_open), contentDescription = null)
-            }
+            trailingIcon = {
+                IconButton(onClick = { onAuthUiAction(AuthUiAction.OnShowPasswordClick) }) {
+                    Icon(
+                        painter = painterResource(id = if (showPassword) R.drawable.ic_eye_close else R.drawable.ic_eye_open),
+                        contentDescription = null
+                    )
+                }
             }
         )
+        repeatPassword?.let {
+            Spacer(modifier = Modifier.size(16.dp))
+            TextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = it,
+                onValueChange = { onAuthUiAction(AuthUiAction.OnRepeatPasswordValueChange(it)) },
+                label = { Text(text = stringResource(R.string.auth_repeat_password_label)) },
+                placeholder = { Text(text = stringResource(R.string.auth_password_placeholder)) },
+                visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = null
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = { onAuthUiAction(AuthUiAction.OnShowPasswordClick) }) {
+                        Icon(
+                            painter = painterResource(id = if (showPassword) R.drawable.ic_eye_close else R.drawable.ic_eye_open),
+                            contentDescription = null
+                        )
+                    }
+                }
+            )
+        }
         Spacer(modifier = Modifier.size(16.dp))
         Button(modifier = Modifier.fillMaxWidth(),
             onClick = { onAuthUiAction(AuthUiAction.OnConfirmClick) }) {
-            Text(text = stringResource(R.string.auth_login_text_button))
+            Text(text = stringResource(confirmBtnText))
         }
         Spacer(modifier = Modifier.size(16.dp))
-        TextButton(onClick = toSignUpPath) {
+        TextButton(
+            modifier = Modifier.alpha(if (displayToSignUpBtn) 1.0f else 0f),
+            onClick = { onAuthUiAction(AuthUiAction.GoToSignUp) }) {
             Text(text = stringResource(R.string.auth_create_account_text_button))
         }
     }

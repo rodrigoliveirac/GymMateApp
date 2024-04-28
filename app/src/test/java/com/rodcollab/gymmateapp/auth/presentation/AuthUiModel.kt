@@ -3,7 +3,6 @@ package com.rodcollab.gymmateapp.auth.presentation
 import com.rodcollab.gymmateapp.auth.domain.model.AuthDomain
 import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
 import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
-import com.rodcollab.gymmateapp.core.ResultOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,15 +38,16 @@ class AuthUiModel(dispatcherProvider: CoroutineDispatcher, private val authDomai
                     updateWith(_uiState.value.copy(password = action.password))
                 }
                 is AuthUiAction.OnConfirmClick -> {
-                    updateWith(_uiState.value.copy(resultOf = ResultOf.Idle))
+                    updateWith(_uiState.value.copy(isLoading = true))
                     _uiState.value.apply {
                         fakeSavedStateHandle[SIGN_PATH]?.let { signPath ->
                             authDomain.authenticate(
                                 email = email,
                                 password = password,
-                                signPath = SignPath.valueOf(signPath),
+                                repeatPassword = repeatPassword,
+                                signPath = SignPath.getSignPath(signPath),
                                 onResult = { resultOf ->
-                                    updateWith(_uiState.value.copy(resultOf = resultOf))
+                                    updateWith(_uiState.value.copy(isLoading = false))
                                     toMainScreen()
                                 }
                             )
@@ -60,6 +60,12 @@ class AuthUiModel(dispatcherProvider: CoroutineDispatcher, private val authDomai
                             it.copy(showPassword = !_uiState.value.showPassword)
                         }
                     }
+                }
+                is AuthUiAction.GoToSignUp -> {
+
+                }
+                is AuthUiAction.OnRepeatPasswordValueChange -> {
+                    updateWith(_uiState.value.copy(repeatPassword = action.repeatPassword))
                 }
             }
         }

@@ -7,10 +7,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.rodcollab.gymmateapp.auth.presentation.LoginScreen
+import androidx.navigation.navArgument
+import com.rodcollab.gymmateapp.auth.presentation.AuthScreen
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.SIGNIN_ROUTE
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.SIGNUP_ROUTE
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
 import com.rodcollab.gymmateapp.ui.theme.GymMateAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,17 +26,52 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             GymMateAppTheme {
-                // A surface container using the 'background' color from the theme
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
 
-                    NavHost(navController = navController, startDestination = "LoginScreen") {
-                        composable(route = "LoginScreen") {
-                            LoginScreen {
-//                                navController.navigate("${"SignUpScreen"}/SIGN_UP")
+                    NavHost(navController = navController, startDestination = SIGNIN_ROUTE) {
+                        composable(
+                            route = SIGNIN_ROUTE,
+                            arguments = listOf(navArgument(GymMateDestinationsArgs.SIGN_PATH) {
+                                type = NavType.StringType
+                            }, navArgument(GymMateDestinationsArgs.emailArgs) {
+                                type = NavType.StringType
+                                nullable = true
+                            }, navArgument(GymMateDestinationsArgs.passwordArgs) {
+                                type = NavType.StringType
+                                nullable = true
+                            })
+                        ) {
+                            AuthScreen { route ->
+                                route?.let {
+                                    navController.navigate(it) {
+                                        if (route == GymMateScreens.MAIN_SCREEN) {
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        composable(
+                            route = SIGNUP_ROUTE,
+                            arguments = listOf(navArgument(GymMateDestinationsArgs.SIGN_PATH) {
+                                type = NavType.StringType
+                            })
+                        ) {
+                            AuthScreen { route ->
+                                route?.let {
+                                    navController.navigate(it) {
+                                        popUpTo(navController.previousBackStackEntry?.destination?.route.toString()) {
+                                            inclusive = true
+                                        }
+                                    }
+                                } ?: run {
+                                    navController.navigateUp()
+                                }
                             }
                         }
                     }
