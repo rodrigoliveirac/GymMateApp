@@ -17,7 +17,7 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.SIGNUP_ROUTE
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
-import com.rodcollab.gymmateapp.ui.theme.GymMateAppTheme
+import com.rodcollab.gymmateapp.core.ui.theme.GymMateAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

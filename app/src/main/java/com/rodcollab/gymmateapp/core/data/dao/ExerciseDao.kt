@@ -8,7 +8,10 @@ import com.rodcollab.gymmateapp.core.data.model.Exercise
 @Dao
 interface ExerciseDao {
     @Query("SELECT * FROM default_exercises")
-    fun getAll() : List<Exercise>
+    suspend fun getAll() : List<Exercise>
     @Upsert
-    fun upsert(exercises: List<Exercise>)
+    suspend fun upsert(exercises: List<Exercise>)
+
+    @Query("SELECT * FROM default_exercises WHERE exercise_bodyPart =:bodyPart")
+    suspend fun getByBodyPart(bodyPart: String) : List<Exercise>
 }

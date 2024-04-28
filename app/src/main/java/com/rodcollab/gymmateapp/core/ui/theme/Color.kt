@@ -1,4 +1,4 @@
-package com.rodcollab.gymmateapp.ui.theme
+package com.rodcollab.gymmateapp.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

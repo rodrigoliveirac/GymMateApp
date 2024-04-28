@@ -20,7 +20,7 @@ class CoroutineDownloadWorker(
     params: WorkerParameters
 ) : Worker(context, params) {
 
-    val coroutine = CoroutineScope(Dispatchers.IO + Job())
+    private val coroutine = CoroutineScope(Dispatchers.IO + Job())
     override fun doWork(): Result {
         coroutine.launch {
             try {
