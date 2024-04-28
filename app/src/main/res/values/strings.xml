@@ -1,3 +1,18 @@
 <resources>
-    <string name="app_name">GymMateApp</string>
+    <string name="app_name">GymMate</string>
+    <string name="sign_in">Sign In</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_login_text_button">LOGIN</string>
+    <string name="auth_create_account_text_button">Create account</string>
+    <string name="auth_email_placeholder">user@gmail.com</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_password_placeholder">somepassword</string>
+    <string name="auth_welcome_text">Welcome to GymMate!</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="auth_creating_account_text">Creating Account</string>
+    <string name="auth_sign_up">SIGN UP</string>
+    <string name="auth_repeat_password_label">Repeat password</string>
+    <string name="loading_data_account">Loading Data Account</string>
+    <string name="saving_new_data_account">Saving New Data Account</string>
+    <string name="empty_text">\"\"</string>
 </resources>
