@@ -21,7 +21,9 @@ kotlinxCoroutinesTest = "1.8.1-Beta"
 gmsGoogleServices = "4.4.0"
 hiltTest = "2.49"
 mockitoKotlin = "5.3.1"
-
+gson = "2.8.2"
+room = "2.6.1"
+worker = "2.9.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -43,6 +45,13 @@ dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref 
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltCompiler"}
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit"}
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit"}
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson"}
+worker-coroutines = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "worker" }
+
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation"}
 navigation-compose-hilt = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavCompose" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom"}
