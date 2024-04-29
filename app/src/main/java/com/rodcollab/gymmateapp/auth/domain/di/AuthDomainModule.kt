@@ -1,6 +1,7 @@
 package com.rodcollab.gymmateapp.auth.domain.di
 
-import com.rodcollab.gymmateapp.auth.data.AuthRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.rodcollab.gymmateapp.auth.data.AuthRepositoryImpl
 import com.rodcollab.gymmateapp.auth.domain.model.AuthDomain
 import com.rodcollab.gymmateapp.auth.domain.usecase.EmailAndPasswordValidatorImpl
 import com.rodcollab.gymmateapp.auth.domain.usecase.UserAuthImpl
@@ -17,11 +18,11 @@ object AuthDomainModule {
     @ViewModelScoped
     @Provides
     fun providesAuthDomain(
-        authRepository: AuthRepository,
+        firebaseAuth: FirebaseAuth,
     ): AuthDomain {
         return AuthDomain(
             authenticate = UserAuthImpl(
-                authRepository = authRepository,
+                authRepository = AuthRepositoryImpl(firebaseAuth),
                 emailAndPasswordValidator = EmailAndPasswordValidatorImpl()
             )
         )

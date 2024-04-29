@@ -100,4 +100,13 @@ dependencies {
     testImplementation(libs.coroutines.test)
 
     androidTestImplementation(libs.dagger.hilt.test)
+
+    implementation(libs.gson)
+
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
+    implementation(libs.worker.coroutines)
+    implementation(libs.coroutines.core)
 }

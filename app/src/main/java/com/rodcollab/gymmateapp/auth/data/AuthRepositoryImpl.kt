@@ -6,25 +6,35 @@ import com.rodcollab.gymmateapp.auth.domain.model.User
 import com.rodcollab.gymmateapp.core.ResultOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class AuthRepositoryImpl @Inject constructor( private val firebaseAuth: FirebaseAuth) :
+class AuthRepositoryImpl(private val firebaseAuth: FirebaseAuth) :
     AuthRepository {
 
-    override suspend fun signInWithEmailAndPassword(email: String, password: String, onResult: (ResultOf<User>) -> Unit) {
-        withContext(Dispatchers.IO) {
-            firebaseAuth.signInWithEmailAndPassword(email,password)
-                .addOnSuccessListener { authResult ->
-                    authResult.user?.apply {
-                        onResult(ResultOf.Success(User(uuid = uid, username = displayName, email = this.email, password = password)))
-                    }
-                    Log.i(FIREBASE_LOGIN, "User logged successfully")
+    override suspend fun signInWithEmailAndPassword(
+        email: String,
+        password: String,
+        onResult: (ResultOf<User>) -> Unit
+    ) {
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnSuccessListener { authResult ->
+                authResult.user?.apply {
+                    onResult(
+                        ResultOf.Success(
+                            User(
+                                uuid = uid,
+                                username = displayName,
+                                email = this.email,
+                                password = password
+                            )
+                        )
+                    )
                 }
-                .addOnFailureListener { e ->
-                    onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
-                    Log.i(FIREBASE_LOGIN, "User logged unsuccessfully")
-                }
-        }
+                Log.i(FIREBASE_LOGIN, "User logged successfully")
+            }
+            .addOnFailureListener { e ->
+                onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
+                Log.i(FIREBASE_LOGIN, "User logged unsuccessfully")
+            }
     }
 
     override suspend fun createUserWithEmailAndPassword(
@@ -32,23 +42,34 @@ class AuthRepositoryImpl @Inject constructor( private val firebaseAuth: Firebase
         password: String,
         onResult: (ResultOf<User>) -> Unit
     ) {
-        withContext(Dispatchers.IO) {
-            firebaseAuth
-                .createUserWithEmailAndPassword(email, password)
-                .addOnSuccessListener { authResult ->
-                    authResult.user?.apply {
-                        onResult(ResultOf.Success(User(uuid = uid, username = displayName, email = this.email, password = password)))
-                    }
-                    Log.i(FIREBASE_SIGNUP, "Registered successfully")
+        firebaseAuth
+            .createUserWithEmailAndPassword(email, password)
+            .addOnSuccessListener { authResult ->
+                authResult.user?.apply {
+                    onResult(
+                        ResultOf.Success(
+                            User(
+                                uuid = uid,
+                                username = displayName,
+                                email = this.email,
+                                password = password
+                            )
+                        )
+                    )
                 }
-                .addOnFailureListener { e ->
-                    onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
-                    Log.i(FIREBASE_SIGNUP, "Registered unsuccessfully")
-                }
-        }
+                Log.i(FIREBASE_SIGNUP, "Registered successfully")
+            }
+            .addOnFailureListener { e ->
+                onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
+                Log.i(FIREBASE_SIGNUP, "Registered unsuccessfully")
+            }
+
     }
 
-    override suspend fun sendPasswordResetEmail(email: String, onResult: (ResultOf<String>) -> Unit) {
+    override suspend fun sendPasswordResetEmail(
+        email: String,
+        onResult: (ResultOf<String>) -> Unit
+    ) {
         withContext(Dispatchers.IO) {
             firebaseAuth.sendPasswordResetEmail(email)
                 .addOnSuccessListener {
