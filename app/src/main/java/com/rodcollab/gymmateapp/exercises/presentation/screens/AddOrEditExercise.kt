@@ -226,11 +226,6 @@ fun AddOrEditExerciseScreen(
                     .fillMaxSize()) {
                 Box(Modifier.align(Alignment.CenterHorizontally)) {
 
-                    val dataImg: Any? = if(uiState.imgUrl != "imgUrl") {
-                        uiState.imgUrl
-                    } else {
-                        R.drawable.photo_placeholder
-                    }
                     AsyncImage(
                         modifier = Modifier
                             .size(120.dp)
@@ -239,7 +234,7 @@ fun AddOrEditExerciseScreen(
                                 compositingStrategy = CompositingStrategy.Offscreen
                             },
                         model = ImageRequest.Builder(context)
-                            .data(dataImg)
+                            .data(uiState.imgUrl ?: R.drawable.photo_placeholder)
                             .crossfade(true)
                             .build(),
                         contentDescription = "icon",

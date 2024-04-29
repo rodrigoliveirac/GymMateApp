@@ -84,7 +84,7 @@ class BPExercisesViewModel @Inject constructor(private val exercises: ExercisesD
 
                 }
                 is BPExercisesUiAction.OnNewExercise -> {
-                    goTo("$ADD_OR_EDIT_EXERCISE_SCREEN/ADD?$bodyPartArgs=${_uiState.value.exercisesByBP[0].bodyPart}?${GymMateDestinationsArgs.nameExerciseArgs}=${GymMateDestinationsArgs.nameExerciseArgs}?${GymMateDestinationsArgs.imgUrlExerciseArgs}=${GymMateDestinationsArgs.imgUrlExerciseArgs}?${GymMateDestinationsArgs.notesExerciseArgs}=${GymMateDestinationsArgs.notesExerciseArgs}")
+                    goTo("$ADD_OR_EDIT_EXERCISE_SCREEN/ADD?$bodyPartArgs=${_uiState.value.exercisesByBP[0].bodyPart}?${GymMateDestinationsArgs.nameExerciseArgs}={${GymMateDestinationsArgs.nameExerciseArgs}}?${GymMateDestinationsArgs.imgUrlExerciseArgs}={${GymMateDestinationsArgs.imgUrlExerciseArgs}}?${GymMateDestinationsArgs.notesExerciseArgs}={${GymMateDestinationsArgs.notesExerciseArgs}}")
                 }
             }
         }
