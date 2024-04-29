@@ -9,7 +9,9 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.notesExerciseArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.passwordArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.ADD_TRAINING
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.AUTH_SCREEN
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.TRAININGS
 
 /**
  * Screens used in [GymMateDestinations]
@@ -19,6 +21,8 @@ internal object GymMateScreens {
     const val AUTH_SCREEN = "authentication"
     const val EXERCISES = "exercises"
     const val ADD_OR_EDIT_EXERCISE_SCREEN = "addOrEditExerciseScreen"
+    const val TRAININGS = "trainings"
+    const val ADD_TRAINING = "addTraining"
 }
 
 /**
@@ -43,4 +47,6 @@ object GymMateDestinations {
     const val SIGNUP_ROUTE = "$AUTH_SCREEN/{$SIGN_PATH}"
     const val SIGNIN_ROUTE = "$AUTH_SCREEN/{$SIGN_PATH}?$emailArgs={$emailArgs}?$passwordArgs={$passwordArgs}"
     const val ADD_OR_EDIT_EXERCISE_ROUTE = "$ADD_OR_EDIT_EXERCISE_SCREEN/{$addOrEditArgs}?$bodyPartArgs={$bodyPartArgs}?$nameExerciseArgs={$nameExerciseArgs}?$imgUrlExerciseArgs={$imgUrlExerciseArgs}?$notesExerciseArgs={$notesExerciseArgs}"
+    const val TRAINING_ROUTE = TRAININGS
+    const val ADD_TRAINING_ROUTE = ADD_TRAINING
 }

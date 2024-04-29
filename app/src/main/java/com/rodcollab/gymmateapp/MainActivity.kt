@@ -5,22 +5,28 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.ADD_TRAINING_ROUTE
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.SIGNIN_ROUTE
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.MAIN_SCREEN
 import com.rodcollab.gymmateapp.auth.presentation.navigation.authGraph
 import com.rodcollab.gymmateapp.core.ui.theme.GymMateAppTheme
 import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesViewModel
 import com.rodcollab.gymmateapp.exercises.presentation.exercisesGraph
+import com.rodcollab.gymmateapp.routines.TrainingScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -40,6 +46,16 @@ class MainActivity : ComponentActivity() {
                     ) {
                         authGraph(navController)
                         exercisesGraph(navController,sharedViewModel)
+                        composable(route = GymMateDestinations.TRAINING_ROUTE) {
+                            TrainingScreen(
+                                goTo = {
+                                    navController.navigate(it)
+                                }
+                            )
+                        }
+                        composable(ADD_TRAINING_ROUTE) {
+
+                        }
                     }
                 }
             }
