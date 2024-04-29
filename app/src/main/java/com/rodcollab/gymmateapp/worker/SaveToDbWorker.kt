@@ -7,7 +7,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.rodcollab.gymmateapp.core.data.AppDatabase
 import com.rodcollab.gymmateapp.core.data.model.BodyPart
-import com.rodcollab.gymmateapp.core.data.model.Exercise
+import com.rodcollab.gymmateapp.core.data.model.ExerciseLocal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -52,7 +52,7 @@ class CoroutineDownloadWorker(
                         val jsonObject = JSONObject(jsonString)
                         val jsonArray = jsonObject.getJSONArray("exercises")
                         var count = 0
-                        val list = mutableListOf<Exercise>()
+                        val list = mutableListOf<ExerciseLocal>()
                         while (jsonArray.length() != count) {
                             val exercise = jsonArray[count] as JSONObject
                             var countInstructions = 0
@@ -64,7 +64,7 @@ class CoroutineDownloadWorker(
                                 countInstructions++
                             }
                             list.add(
-                                Exercise(
+                                ExerciseLocal(
                                     name = exercise.getString("name"),
                                     image = exercise.getString("gifUrl"),
                                     bodyPart = exercise.getString("bodyPart"),

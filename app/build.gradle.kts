@@ -108,5 +108,5 @@ dependencies {
     ksp(libs.room.compiler)
 
     implementation(libs.worker.coroutines)
-    
+    implementation(libs.coroutines.core)
 }

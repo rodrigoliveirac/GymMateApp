@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity("default_exercises")
-data class Exercise(
+data class ExerciseLocal(
     @PrimaryKey(autoGenerate = true) val id: Long = 0L,
     @ColumnInfo("exercise_name") val name: String,
     @ColumnInfo("exercise_image") val image: String,

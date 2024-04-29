@@ -28,9 +28,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.rodcollab.gymmateapp" />
-                  <option name="mobileSdkAppId" value="1:537890086740:android:d04c5ca16a07cb21b232c1" />
-                  <option name="projectId" value="gymmate-9cd7b" />
-                  <option name="projectNumber" value="537890086740" />
+                  <option name="mobileSdkAppId" value="1:810243888583:android:91db232be7fd868eeff5e2" />
+                  <option name="projectId" value="lealappsteste-a6b72" />
+                  <option name="projectNumber" value="810243888583" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

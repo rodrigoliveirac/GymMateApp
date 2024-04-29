@@ -1,4 +1,4 @@
-package com.rodcollab.gymmateapp.exercises.presentation
+package com.rodcollab.gymmateapp.exercises.presentation.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -39,11 +39,13 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.core.ui.BasicLoading
+import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesUiAction
+import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BodyPartScreen(
-    goTo: () -> Unit,
+    goTo: (String) -> Unit,
     viewModel: BPExercisesViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
