@@ -13,3 +13,7 @@
 - Navigation
 - MVVM arch
 - Coroutines
+
+## Preview
+  ![updatePrintApp](https://github.com/rodrigoliveirac/GymMateApp/assets/72306040/0e3f3113-3d50-4f3e-b56a-87dc66e469b2)
+
