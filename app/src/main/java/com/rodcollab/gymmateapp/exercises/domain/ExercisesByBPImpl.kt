@@ -6,35 +6,49 @@ import com.rodcollab.gymmateapp.core.data.model.Exercise
 import com.rodcollab.gymmateapp.exercises.data.ExercisesRepository
 import javax.inject.Inject
 
-class ExercisesByBPImpl @Inject constructor(private val exercises: ExercisesRepository) : ExercisesByBP {
-    override suspend fun invoke(onResult: (ResultOf<Map<BodyPart,Exercise>>) -> Unit) {
+class ExercisesByBPImpl @Inject constructor(private val exercises: ExercisesRepository) :
+    ExercisesByBP {
+    override suspend fun invoke(onResult: (ResultOf<Map<BodyPart, List<Exercise>>>) -> Unit) {
         try {
-            val bodyPartWithExercises = hashMapOf<BodyPart,Exercise>()
-            exercises.getBodyParts().map { bp ->
-                exercises.getExerciseByBodyPart(bp.name) { resultOf ->
-                    when(resultOf) {
-                        is ResultOf.Success -> {
-                            val exercise = Exercise(
-                                id = resultOf.value.id,
-                                name = resultOf.value.name,
-                                image = resultOf.value.image,
-                                bodyPart = resultOf.value.bodyPart,
-                                notes = resultOf.value.notes
-                            )
-                            bodyPartWithExercises[bp] = exercise
-                        }
-                        is ResultOf.Failure -> {
-                            onResult(ResultOf.Failure(resultOf.message,resultOf.throwable))
-                        }
-                        else -> {
+            val bodyPartWithExercises = hashMapOf<BodyPart, List<Exercise>>()
+            exercises.getBodyParts { resultOf ->
+                when (resultOf) {
+                    is ResultOf.Success -> {
+                        resultOf.value.map { bp ->
+                            exercises.getExerciseByBodyPart(bp.name) { resultOf ->
+                                when (resultOf) {
+                                    is ResultOf.Success -> {
+                                        bodyPartWithExercises[bp] = resultOf.value
+                                    }
 
+                                    is ResultOf.Failure -> {
+                                        onResult(
+                                            ResultOf.Failure(
+                                                resultOf.message,
+                                                resultOf.throwable
+                                            )
+                                        )
+                                    }
+
+                                    else -> {}
+                                }
+                            }
                         }
+                        onResult(ResultOf.Success(bodyPartWithExercises))
+                    }
+
+                    is ResultOf.Failure -> {
+                        onResult(ResultOf.Failure(resultOf.message, resultOf.throwable))
+                    }
+
+                    else -> {
+
                     }
                 }
             }
-            onResult(ResultOf.Success(bodyPartWithExercises))
-        } catch (e:Exception) {
-            onResult(ResultOf.Failure(e.message,e))
+        } catch (e: Exception) {
+            onResult(ResultOf.Failure(e.message, e))
         }
+
     }
 }

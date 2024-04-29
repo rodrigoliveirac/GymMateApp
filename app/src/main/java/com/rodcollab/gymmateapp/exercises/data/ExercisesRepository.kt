@@ -5,6 +5,9 @@ import com.rodcollab.gymmateapp.core.data.model.BodyPart
 import com.rodcollab.gymmateapp.core.data.model.Exercise
 
 interface ExercisesRepository {
-    suspend fun getBodyParts(): List<BodyPart>
-    suspend fun getExerciseByBodyPart(bodyPart: String, onResult: (ResultOf<Exercise>)-> Unit) : List<Exercise>
+    suspend fun getBodyParts(onResult: suspend (ResultOf<List<BodyPart>>) -> Unit)
+    suspend fun getExerciseByBodyPart(
+        bodyPart: String,
+        onResult: suspend (ResultOf<List<Exercise>>) -> Unit
+    )
 }

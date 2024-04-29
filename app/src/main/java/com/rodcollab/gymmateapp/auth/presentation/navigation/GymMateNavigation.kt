@@ -11,6 +11,7 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.AUTH
 internal object GymMateScreens {
     const val MAIN_SCREEN = "main"
     const val AUTH_SCREEN = "authentication"
+    const val EXERCISES = "exercises"
 }
 
 /**

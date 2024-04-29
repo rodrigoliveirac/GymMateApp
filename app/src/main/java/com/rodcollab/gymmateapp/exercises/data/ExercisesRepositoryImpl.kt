@@ -14,15 +14,23 @@ class ExercisesRepositoryImpl @Inject constructor(
     private val bodyPartDao: BodyPartDao
 ) : ExercisesRepository {
 
-    override suspend fun getBodyParts(): List<BodyPart> {
+    override suspend fun getBodyParts(onResult: suspend (ResultOf<List<BodyPart>>) -> Unit) {
         return withContext(Dispatchers.IO) {
-            bodyPartDao.getAll()
+            try {
+                onResult(ResultOf.Success(bodyPartDao.getAll()))
+            }catch (e:Exception) {
+                onResult(ResultOf.Failure(e.message,e.cause))
+            }
         }
     }
 
-    override suspend fun getExerciseByBodyPart(bodyPart: String, onResult: (ResultOf<Exercise>)-> Unit): List<Exercise> {
+    override suspend fun getExerciseByBodyPart(bodyPart: String, onResult: suspend (ResultOf<List<Exercise>>) -> Unit) {
          return withContext(Dispatchers.IO) {
-            exerciseDao.getByBodyPart(bodyPart)
+            try {
+                onResult(ResultOf.Success(exerciseDao.getByBodyPart(bodyPart)))
+            } catch (e:Exception) {
+                onResult(ResultOf.Failure(e.message,e.cause))
+            }
         }
     }
 }
