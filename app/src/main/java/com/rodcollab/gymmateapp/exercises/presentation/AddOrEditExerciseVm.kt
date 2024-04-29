@@ -105,11 +105,12 @@ class AddOrEditExerciseVm @Inject constructor(
                         it.copy(isLoading = true, message = "Loading")
                     }
                    // val storageBucket = getStorageBucket()
+                    val img:String? = if(_uiState.value.imgUrl == "imgUrl") null else _uiState.value.imgUrl
                     domain.addExercise(
                         bodyPart = _uiState.value.bodyPart,
                         document = exerciseId,
                         name = _uiState.value.name,
-                        img = _uiState.value.imgUrl,
+                        img = img,
                         notes = _uiState.value.notes
                     ) { resultOf ->
                         when (resultOf) {

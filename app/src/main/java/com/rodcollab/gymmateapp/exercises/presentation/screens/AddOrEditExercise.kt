@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -57,6 +58,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
@@ -223,16 +225,21 @@ fun AddOrEditExerciseScreen(
                     .padding(16.dp)
                     .fillMaxSize()) {
                 Box(Modifier.align(Alignment.CenterHorizontally)) {
+
+                    val dataImg: Any? = if(uiState.imgUrl != "imgUrl") {
+                        uiState.imgUrl
+                    } else {
+                        R.drawable.photo_placeholder
+                    }
                     AsyncImage(
                         modifier = Modifier
-                            .alpha(if (uiState.newPhotoIsLoading) 0.0f else 1f)
                             .size(120.dp)
                             .clip(CircleShape)
                             .graphicsLayer {
                                 compositingStrategy = CompositingStrategy.Offscreen
                             },
                         model = ImageRequest.Builder(context)
-                            .data(uiState.imgUrl ?: R.drawable.photo_placeholder)
+                            .data(dataImg)
                             .crossfade(true)
                             .build(),
                         contentDescription = "icon",
@@ -263,7 +270,6 @@ fun AddOrEditExerciseScreen(
                         shape = CircleShape,
 
                         contentPadding = PaddingValues(0.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFB1C8)),
                         onClick = { showBottomSheet = !showBottomSheet }) {
                         Icon(
                             modifier = Modifier.padding(8.dp),

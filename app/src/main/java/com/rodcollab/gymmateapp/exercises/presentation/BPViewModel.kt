@@ -14,6 +14,7 @@ import com.rodcollab.gymmateapp.core.data.model.ExerciseLocal
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -55,12 +56,16 @@ class BPExercisesViewModel @Inject constructor(private val exercises: ExercisesD
         viewModelScope.launch {
             when(action) {
                 is BPExercisesUiAction.OnBodyPart -> {
+                    _uiState.update {
+                        it.copy(isLoading = true)
+                    }
                     async {
                         exercises.exercises.myExercises(action.bodyPart.name) { result ->
                             when(result) {
                                 is ResultOf.Success -> {
+                                        delay(500)
                                         _uiState.update {
-                                            it.copy(exercisesByBP = result.value + _uiState.value.bpWithExercises[action.bodyPart]!!)
+                                            it.copy(exercisesByBP = result.value + _uiState.value.bpWithExercises[action.bodyPart]!!, isLoading = false)
                                         }
                                 }
                                 is ResultOf.Failure -> {

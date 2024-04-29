@@ -1,6 +1,8 @@
 package com.rodcollab.gymmateapp.exercises.presentation.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,56 +68,60 @@ fun BodyPartScreen(
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)) {
-            LazyColumn {
-                items(uiState.bpWithExercises.keys.toList()) { bodyParty ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        elevation = CardDefaults.cardElevation(4.dp),
-                        onClick = {
-                            viewModel.onUiActions(BPExercisesUiAction.OnBodyPart(bodyParty),goTo)
-                    }) {
-                        Row(modifier = Modifier.padding(8.dp),verticalAlignment = Alignment.CenterVertically) {
-                            Box() {
-                                var isLoading by rememberSaveable { mutableStateOf(false) }
-                                AsyncImage(model = ImageRequest.Builder(context).data(bodyParty.imgUrl).crossfade(true).build(),
-                                    contentDescription = "icon",
-                                    contentScale = ContentScale.FillBounds,
-                                    modifier = Modifier
-                                        .size(56.dp)
-                                        .clip(
-                                            RoundedCornerShape(28.dp)
-                                        ),
-                                    onState = {
-                                        when (it) {
-                                            is AsyncImagePainter.State.Loading -> {
-                                                isLoading = true
-                                            }
+            if(uiState.isLoading) {
+                Column(Modifier.fillMaxSize().align(Alignment.Center), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "Loading")
+                    Spacer(modifier = Modifier.size(8.dp))
+                    CircularProgressIndicator(strokeWidth = 2.dp)
+                }
+            } else {
+                LazyColumn {
+                    items(uiState.bpWithExercises.keys.toList()) { bodyParty ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(8.dp),
+                            elevation = CardDefaults.cardElevation(4.dp),
+                            onClick = {
+                                viewModel.onUiActions(BPExercisesUiAction.OnBodyPart(bodyParty),goTo)
+                            }) {
+                            Row(modifier = Modifier.padding(8.dp),verticalAlignment = Alignment.CenterVertically) {
+                                Box() {
+                                    var isLoading by rememberSaveable { mutableStateOf(false) }
+                                    AsyncImage(model = ImageRequest.Builder(context).data(bodyParty.imgUrl).crossfade(true).build(),
+                                        contentDescription = "icon",
+                                        contentScale = ContentScale.FillBounds,
+                                        modifier = Modifier
+                                            .size(56.dp)
+                                            .clip(
+                                                RoundedCornerShape(28.dp)
+                                            ),
+                                        onState = {
+                                            when (it) {
+                                                is AsyncImagePainter.State.Loading -> {
+                                                    isLoading = true
+                                                }
 
-                                            is AsyncImagePainter.State.Success -> {
-                                                isLoading = false
-                                            }
+                                                is AsyncImagePainter.State.Success -> {
+                                                    isLoading = false
+                                                }
 
-                                            else -> {
+                                                else -> {
 
+                                                }
                                             }
-                                        }
-                                    })
-                                if(isLoading) {
-                                    CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.align(Alignment.Center))
+                                        })
+                                    if(isLoading) {
+                                        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.align(Alignment.Center))
+                                    }
                                 }
+                                Spacer(modifier = Modifier.size(8.dp))
+                                Text(fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, text = bodyParty.name.uppercase())
                             }
-                            Spacer(modifier = Modifier.size(8.dp))
-                            Text(fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, text = bodyParty.name.uppercase())
                         }
                     }
                 }
             }
         }
-        if(uiState.isLoading) {
-            uiState.message?.let {
-                BasicLoading(title = it)
-            }
-        }
+
 //        if(uiState.displaySnackbar) {
 //            LaunchedEffect(uiState.message) {
 //                snackbarHostState.showSnackbar(uiState.message)
