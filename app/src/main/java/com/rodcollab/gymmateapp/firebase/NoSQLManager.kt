@@ -4,7 +4,7 @@ import com.rodcollab.gymmateapp.core.ResultOf
 
 interface NoSQLManager<T: Any> {
     var userId: String?
-    suspend fun create(
+    suspend fun createOrUpdate(
         collection1: String,
         collection2: String,
         document: String,
@@ -12,7 +12,10 @@ interface NoSQLManager<T: Any> {
         onResult: (ResultOf<T>) -> Unit
     )
 
+    suspend fun deleteFile(document: String, onResult: suspend (ResultOf<String>) -> Unit)
+
     suspend fun upload(image: String, document: String, onResult: suspend (ResultOf<String>) -> Unit)
 
     suspend fun download(bucket: String, filePath: String, onResult: suspend (ResultOf<String>) -> Unit)
+
 }
