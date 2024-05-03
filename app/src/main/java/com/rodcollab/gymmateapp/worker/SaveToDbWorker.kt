@@ -1,6 +1,7 @@
 package com.rodcollab.gymmateapp.worker
 
 import android.content.Context
+import androidx.work.Configuration
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
@@ -90,11 +91,14 @@ class CoroutineDownloadWorker(
 
         fun schedule(appContext: Context) {
 
+            val myConfig = Configuration.Builder()
+                .setMinimumLoggingLevel(android.util.Log.INFO)
+                .build()
+
+            WorkManager.initialize(appContext, myConfig)
 
             val request = OneTimeWorkRequestBuilder<CoroutineDownloadWorker>().build()
-
-            WorkManager.getInstance(appContext)
-                .enqueue(request)
+            WorkManager.getInstance(appContext).enqueue(request)
         }
     }
 }
