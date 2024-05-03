@@ -4,8 +4,6 @@ import android.content.ContentValues.TAG
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.rodcollab.gymmateapp.core.ResultOf
@@ -13,21 +11,17 @@ import com.rodcollab.gymmateapp.core.data.dao.BodyPartDao
 import com.rodcollab.gymmateapp.core.data.dao.ExerciseDao
 import com.rodcollab.gymmateapp.core.data.model.BodyPart
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
+import com.rodcollab.gymmateapp.firebase.NoSQLManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
 class ExercisesRepositoryImpl @Inject constructor(
+    private val remoteManager: NoSQLManager<ExerciseExternal>,
     private val firebaseAuth: FirebaseAuth,
     private val storage: FirebaseStorage,
     private val firestore: FirebaseFirestore,
@@ -137,92 +131,76 @@ class ExercisesRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
 
-                val uuid = document ?: run {
-                    UUID.randomUUID().toString()
-                }
-
-                val storageRef = storage.reference
-                val fileRef =
-                    storageRef.child(uuid).child("${uuid}.pdf")
-
-                var imgUrl: String? = null
-
-                val updateImgUrl: (String?) -> Unit = { imgUrl = it }
-
-                val onResultFileSaved: (ResultOf<String>?) -> Unit = {
-                    it?.let {
-                        launch(Dispatchers.IO + Job()) {
-                            firebaseAuth.currentUser?.zza()?.options?.storageBucket?.let {
-                                downloadFile(it, uuid) { res ->
-                                    when (res) {
-                                        is ResultOf.Success -> {
-                                            updateImgUrl(res.value)
-                                        }
-
-                                        is ResultOf.Failure -> {
-                                            updateImgUrl(null)
-                                        }
-
-                                        else -> {
-
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                img?.let { image ->
-                    async {
-                        fileRef.putFile(Uri.parse(image))
-                            .addOnSuccessListener {
-                                onResultFileSaved(ResultOf.Success(image))
-                            }.addOnFailureListener { exception ->
-                                throw exception
-                            }
-                    }.await()
-                }
-
-                val data = hashMapOf<String, Any?>(
-                    "uuid" to uuid,
-                    "name" to name,
-                    "bodyPart" to bodyPart,
-                    "image" to img,
-                    "notes" to notes
-                )
-                firebaseAuth.currentUser?.uid?.let { userId ->
-                    firestore
-                        .collection(USERS_COLLECTION)
-                        .document(userId)
-                        .collection(EXERCISES_COLLECTION)
-                        .document(uuid)
-                        .set(data)
-                        .addOnSuccessListener {
-                            onResult(
-                                ResultOf.Success(
-                                    ExerciseExternal(
-                                        uuid = uuid,
-                                        name = name,
-                                        image = img,
-                                        bodyPart = bodyPart,
-                                        notes = notes,
-                                        userExercise = true,
-                                    )
-                                )
-                            )
-                            Log.d(TAG, "DocumentSnapshot successfully written!")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w(TAG, "Error writing document", e)
-                        }
+                document?.let {
+                    // Edit Exercise
                 } ?: run {
-                    throw Exception("User is not found")
+                    createExercise(document, img, name, bodyPart, notes, onResult)
                 }
 
             } catch (e: Exception) {
                 onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
             }
+        }
+    }
+
+    private suspend fun createExercise(
+        document: String?,
+        img: String?,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: (ResultOf<ExerciseExternal>) -> Unit
+    ) {
+        val uuid = document ?: run {
+            UUID.randomUUID().toString()
+        }
+
+        img?.let { img ->
+            remoteManager.upload(image = img, document = uuid) { result ->
+                when (result) {
+                    is ResultOf.Success -> {
+                        val model = ExerciseExternal(
+                            uuid = uuid,
+                            name = name,
+                            image = result.value,
+                            bodyPart = bodyPart,
+                            notes = notes,
+                            userExercise = true
+                        )
+                        remoteManager.create(
+                            USERS_COLLECTION,
+                            EXERCISES_COLLECTION,
+                            uuid,
+                            model,
+                            onResult
+                        )
+                    }
+
+                    is ResultOf.Failure -> {
+                        onResult(result)
+                    }
+
+                    else -> {
+                        throw Exception("Unknown exception")
+                    }
+                }
+            }
+        } ?: run {
+            val model = ExerciseExternal(
+                uuid = uuid,
+                name = name,
+                image = img,
+                bodyPart = bodyPart,
+                notes = notes,
+                userExercise = true
+            )
+            remoteManager.create(
+                USERS_COLLECTION,
+                EXERCISES_COLLECTION,
+                uuid,
+                model,
+                onResult
+            )
         }
     }
 
