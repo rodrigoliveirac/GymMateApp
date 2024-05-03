@@ -130,33 +130,118 @@ class ExercisesRepositoryImpl @Inject constructor(
     ) {
         withContext(Dispatchers.IO) {
             try {
-
-                document?.let {
-                    // Edit Exercise
+                document?.let { doc ->
+                    editExercise(doc, img, name, bodyPart, notes, onResult)
                 } ?: run {
-                    createExercise(document, img, name, bodyPart, notes, onResult)
+                    createExercise(img, name, bodyPart, notes, onResult)
                 }
-
             } catch (e: Exception) {
                 onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
             }
         }
     }
 
-    private suspend fun createExercise(
-        document: String?,
+    private suspend fun editExercise(
+        document: String,
         img: String?,
         name: String,
         bodyPart: String,
         notes: String,
         onResult: (ResultOf<ExerciseExternal>) -> Unit
     ) {
-        val uuid = document ?: run {
-            UUID.randomUUID().toString()
-        }
 
-        img?.let { img ->
-            remoteManager.upload(image = img, document = uuid) { result ->
+        img?.let { image ->
+            if (image.contains("file")) {
+                uploadFile(image, document, name, bodyPart, notes, onResult)
+            } else {
+                deleteFile(document, image, name, bodyPart, notes, onResult)
+            }
+        } ?: run {
+            val model = ExerciseExternal(
+                uuid = document,
+                name = name,
+                image = img,
+                bodyPart = bodyPart,
+                notes = notes,
+                userExercise = true
+            )
+            remoteManager.createOrUpdate(
+                USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult
+            )
+        }
+    }
+
+    private suspend fun deleteFile(
+        document: String,
+        image: String,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: (ResultOf<ExerciseExternal>) -> Unit
+    ) {
+        remoteManager.deleteFile(document) { result ->
+            when (result) {
+                is ResultOf.Success -> {
+                    uploadFile(image, document, name, bodyPart, notes, onResult)
+                }
+
+                is ResultOf.Failure -> {
+                    onResult(result)
+                }
+
+                else -> {
+                    throw Exception("Unknown Error")
+                }
+            }
+        }
+    }
+
+    private suspend fun uploadFile(
+        image: String,
+        document: String,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: (ResultOf<ExerciseExternal>) -> Unit
+    ) {
+        remoteManager.upload(image = image, document = document) { result ->
+            when (result) {
+                is ResultOf.Success -> {
+                    val model = ExerciseExternal(
+                        uuid = document,
+                        name = name,
+                        image = result.value,
+                        bodyPart = bodyPart,
+                        notes = notes,
+                        userExercise = true
+                    )
+                    remoteManager.createOrUpdate(
+                        USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult
+                    )
+                }
+
+                is ResultOf.Failure -> {
+                    onResult(result)
+                }
+
+                else -> {
+                    throw Exception("Unknown exception")
+                }
+            }
+        }
+    }
+
+    private suspend fun createExercise(
+        img: String?,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: (ResultOf<ExerciseExternal>) -> Unit
+    ) {
+        val uuid = UUID.randomUUID().toString()
+
+        img?.let { image ->
+            remoteManager.upload(image = image, document = uuid) { result ->
                 when (result) {
                     is ResultOf.Success -> {
                         val model = ExerciseExternal(
@@ -167,12 +252,8 @@ class ExercisesRepositoryImpl @Inject constructor(
                             notes = notes,
                             userExercise = true
                         )
-                        remoteManager.create(
-                            USERS_COLLECTION,
-                            EXERCISES_COLLECTION,
-                            uuid,
-                            model,
-                            onResult
+                        remoteManager.createOrUpdate(
+                            USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult
                         )
                     }
 
@@ -194,38 +275,9 @@ class ExercisesRepositoryImpl @Inject constructor(
                 notes = notes,
                 userExercise = true
             )
-            remoteManager.create(
-                USERS_COLLECTION,
-                EXERCISES_COLLECTION,
-                uuid,
-                model,
-                onResult
+            remoteManager.createOrUpdate(
+                USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult
             )
-        }
-    }
-
-    private suspend fun downloadFile(
-        storageBucket: String,
-        child: String,
-        onResult: (ResultOf<String>) -> Unit
-    ) {
-        withContext(Dispatchers.IO) {
-
-            val ref =
-                storage.getReferenceFromUrl("gs://$storageBucket/$child/$child.pdf")
-
-            ref.downloadUrl.addOnSuccessListener {
-                onResult(
-                    ResultOf.Success(
-                        Uri.parse(it.normalizeScheme().toString()).toString()
-                    )
-                )
-            }
-                .addOnFailureListener {
-                    onResult(ResultOf.Failure(message = it.message, throwable = it.cause))
-                }
-
-
         }
     }
 
