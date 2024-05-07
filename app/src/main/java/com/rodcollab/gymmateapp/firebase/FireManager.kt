@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.rodcollab.gymmateapp.core.Collections
 import com.rodcollab.gymmateapp.core.ResultOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,14 +14,77 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class NoSQLManagerImpl<T : Any>(
+abstract class FireManager<T : Any>(
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage
-) : NoSQLManager<T> {
+) {
 
-    override var userId: String? = firebaseAuth.currentUser?.uid
-    override suspend fun deleteFile(
+    var userId: String? = firebaseAuth.currentUser?.uid
+    fun delete(
+        collection: String,
+        document: String,
+        onResult: (ResultOf<String>) -> Unit
+    ) {
+        try {
+            userId?.let {
+                firestore
+                    .collection("USERS_COLLECTION")
+                    .document(it)
+                    .collection(Collections.EXERCISES_COLLECTION)
+                    .document(document)
+                    .delete()
+                    .addOnSuccessListener {
+                        onResult(ResultOf.Success("Exercise successfully deleted!"))
+                        Log.d(ContentValues.TAG, "DocumentSnapshot successfully deleted!")
+                    }.addOnFailureListener { e ->
+                        onResult(ResultOf.Failure(e.message, e.cause))
+                        Log.w(ContentValues.TAG, "Error deleting document", e)
+                    }
+            } ?: run {
+                throw Exception("User id not found")
+            }
+        } catch (e: Exception) {
+            onResult(ResultOf.Failure(e.message, e.cause))
+        }
+
+    }
+
+    suspend fun filterCollection(
+        filterPair: Pair<String, Any>,
+        collection: String,
+        onResult: suspend (ResultOf<List<T>>) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            val list = mutableListOf<T>()
+            val callback: (ResultOf<List<T>>) -> Unit = {
+                launch(Dispatchers.Default + Job()) {
+                    onResult(it)
+                }
+            }
+            userId?.let { userId ->
+                firestore
+                    .collection("USERS_COLLECTION")
+                    .document(userId)
+                    .collection(collection)
+                    .whereEqualTo(filterPair.first, filterPair.second)
+                    .get()
+                    .addOnCompleteListener {
+                        val data = GymMateModelSerializer<T>().read(collection)
+                        it.result.documents.map { doc ->
+                            list.add(doc.toObject(data::class.java)!!)
+                        }
+                        callback(ResultOf.Success(list))
+                        it.exception?.let { e ->
+                            callback(ResultOf.Failure(e.message, e.cause))
+                        }
+                    }
+            }
+        }
+    }
+
+
+    suspend fun deleteFile(
         document: String,
         onResult: suspend (ResultOf<String>) -> Unit
     ) {
@@ -41,7 +105,7 @@ class NoSQLManagerImpl<T : Any>(
         }
     }
 
-    override suspend fun upload(
+    suspend fun upload(
         image: String, document: String, onResult: suspend (ResultOf<String>) -> Unit
     ) {
         withContext(Dispatchers.IO) {
@@ -84,7 +148,7 @@ class NoSQLManagerImpl<T : Any>(
         return downloadCallback
     }
 
-    override suspend fun download(
+    suspend fun download(
         bucket: String, filePath: String, onResult: suspend (ResultOf<String>) -> Unit
     ) {
         withContext(Dispatchers.IO) {
@@ -107,7 +171,7 @@ class NoSQLManagerImpl<T : Any>(
     }
 
 
-    override suspend fun createOrUpdate(
+    suspend fun createOrUpdate(
         collection1: String,
         collection2: String,
         document: String,
@@ -133,6 +197,7 @@ class NoSQLManagerImpl<T : Any>(
     private fun generatePath(document: String): String {
         return "${document}.pdf"
     }
+
     private fun <R> CoroutineScope.onCoroutineScope(
         result: ResultOf<R>,
         onResult: suspend (ResultOf<R>) -> Unit

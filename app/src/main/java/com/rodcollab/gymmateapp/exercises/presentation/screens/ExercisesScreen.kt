@@ -136,7 +136,7 @@ fun ExercisesScreen(
                                     .padding(8.dp),
                                 textAlign = TextAlign.Center,
                                 fontSize = 14.sp,
-                                text = exercise.name,
+                                text = exercise.name ?: "",
                                 maxLines = 1
                             )
                         }

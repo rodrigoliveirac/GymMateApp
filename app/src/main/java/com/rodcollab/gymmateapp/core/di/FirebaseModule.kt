@@ -19,18 +19,19 @@ object FirebaseModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseAuth() : FirebaseAuth {
+    fun provideFirebaseAuth(): FirebaseAuth {
         return Firebase.auth
     }
+
     @Singleton
     @Provides
-    fun provideFirebaseFireStore() : FirebaseFirestore {
+    fun provideFirebaseFireStore(): FirebaseFirestore {
         return Firebase.firestore
     }
 
     @Singleton
     @Provides
-    fun provideFirebaseStorage() : FirebaseStorage {
+    fun provideFirebaseStorage(): FirebaseStorage {
         return Firebase.storage
     }
 }

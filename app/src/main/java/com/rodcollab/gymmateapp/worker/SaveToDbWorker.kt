@@ -95,7 +95,9 @@ class CoroutineDownloadWorker(
                 .setMinimumLoggingLevel(android.util.Log.INFO)
                 .build()
 
-            WorkManager.initialize(appContext, myConfig)
+            if(!WorkManager.isInitialized()) {
+                WorkManager.initialize(appContext, myConfig)
+            }
 
             val request = OneTimeWorkRequestBuilder<CoroutineDownloadWorker>().build()
             WorkManager.getInstance(appContext).enqueue(request)
