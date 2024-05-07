@@ -121,7 +121,7 @@ class ExercisesRepositoryImpl @Inject constructor(
         name: String,
         img: String?,
         notes: String,
-        onResult: (ResultOf<ExerciseExternal>) -> Unit
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
     ) {
         withContext(Dispatchers.IO) {
             try {
@@ -142,7 +142,7 @@ class ExercisesRepositoryImpl @Inject constructor(
         name: String,
         bodyPart: String,
         notes: String,
-        onResult: (ResultOf<ExerciseExternal>) -> Unit
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
     ) {
 
         img?.let { image ->
@@ -170,20 +170,22 @@ class ExercisesRepositoryImpl @Inject constructor(
         name: String,
         bodyPart: String,
         notes: String,
-        onResult: (ResultOf<ExerciseExternal>) -> Unit
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
     ) {
-        deleteFile(document) { result ->
-            when (result) {
-                is ResultOf.Success -> {
-                    uploadFile(image, document, name, bodyPart, notes, onResult)
-                }
+        withContext(Dispatchers.IO) {
+            deleteFile(document) { result ->
+                when (result) {
+                    is ResultOf.Success -> {
+                        uploadFile(image, document, name, bodyPart, notes, onResult)
+                    }
 
-                is ResultOf.Failure -> {
-                    onResult(result)
-                }
+                    is ResultOf.Failure -> {
+                        onResult(result)
+                    }
 
-                else -> {
-                    throw Exception("Unknown Error")
+                    else -> {
+                        throw Exception("Unknown Error")
+                    }
                 }
             }
         }
@@ -195,50 +197,14 @@ class ExercisesRepositoryImpl @Inject constructor(
         name: String,
         bodyPart: String,
         notes: String,
-        onResult: (ResultOf<ExerciseExternal>) -> Unit
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
     ) {
-        upload(image = image, document = document) { result ->
-            when (result) {
-                is ResultOf.Success -> {
-                    val model = ExerciseExternal(
-                        uuid = document,
-                        name = name,
-                        image = result.value,
-                        bodyPart = bodyPart,
-                        notes = notes,
-                        userExercise = true
-                    )
-                    createOrUpdate(
-                        USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult
-                    )
-                }
-
-                is ResultOf.Failure -> {
-                    onResult(result)
-                }
-
-                else -> {
-                    throw Exception("Unknown exception")
-                }
-            }
-        }
-    }
-
-    private suspend fun createExercise(
-        img: String?,
-        name: String,
-        bodyPart: String,
-        notes: String,
-        onResult: (ResultOf<ExerciseExternal>) -> Unit
-    ) {
-        val uuid = UUID.randomUUID().toString()
-
-        img?.let { image ->
-            upload(image, uuid) { result ->
+        withContext(Dispatchers.IO) {
+            upload(image = image, document = document) { result ->
                 when (result) {
                     is ResultOf.Success -> {
                         val model = ExerciseExternal(
-                            uuid = uuid,
+                            uuid = document,
                             name = name,
                             image = result.value,
                             bodyPart = bodyPart,
@@ -246,7 +212,7 @@ class ExercisesRepositoryImpl @Inject constructor(
                             userExercise = true
                         )
                         createOrUpdate(
-                            USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult
+                            USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult
                         )
                     }
 
@@ -259,16 +225,56 @@ class ExercisesRepositoryImpl @Inject constructor(
                     }
                 }
             }
-        } ?: run {
-            val model = ExerciseExternal(
-                uuid = uuid,
-                name = name,
-                image = img,
-                bodyPart = bodyPart,
-                notes = notes,
-                userExercise = true
-            )
-            createOrUpdate(USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult)
+        }
+    }
+
+    private suspend fun createExercise(
+        img: String?,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            val uuid = UUID.randomUUID().toString()
+
+            img?.let { image ->
+                upload(image, uuid) { result ->
+                    when (result) {
+                        is ResultOf.Success -> {
+                            val model = ExerciseExternal(
+                                uuid = uuid,
+                                name = name,
+                                image = result.value,
+                                bodyPart = bodyPart,
+                                notes = notes,
+                                userExercise = true
+                            )
+                            createOrUpdate(
+                                USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult
+                            )
+                        }
+
+                        is ResultOf.Failure -> {
+                            onResult(result)
+                        }
+
+                        else -> {
+                            throw Exception("Unknown exception")
+                        }
+                    }
+                }
+            } ?: run {
+                val model = ExerciseExternal(
+                    uuid = uuid,
+                    name = name,
+                    image = img,
+                    bodyPart = bodyPart,
+                    notes = notes,
+                    userExercise = true
+                )
+                createOrUpdate(USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult)
+            }
         }
     }
 

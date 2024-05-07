@@ -1,5 +1,7 @@
 package com.rodcollab.gymmateapp.core.data.model
 
+import java.io.Serializable
+
 data class ExerciseExternal(
     val uuid: String? = null,
     val name: String? = null,
@@ -7,4 +9,4 @@ data class ExerciseExternal(
     val bodyPart: String? = null,
     val notes: String? = null,
     val userExercise: Boolean? = null
-)
+) : Serializable

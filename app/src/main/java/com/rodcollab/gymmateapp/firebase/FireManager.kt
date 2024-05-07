@@ -11,6 +11,7 @@ import com.rodcollab.gymmateapp.core.ResultOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -92,13 +93,16 @@ abstract class FireManager<T : Any>(
             val storageRef = storage.reference
             val desertRef = storageRef.child(generatePath(document))
 
+            val callback : ()-> Unit = {
+                onCoroutineScope(
+                    ResultOf.Success("The file was deleted successfully!"),
+                    onResult
+                )
+            }
             desertRef
                 .delete()
                 .addOnSuccessListener {
-                    onCoroutineScope(
-                        ResultOf.Success("The file was deleted successfully!"),
-                        onResult
-                    )
+                    callback()
                 }.addOnFailureListener {
                     onCoroutineScope(ResultOf.Failure(it.message, it.cause), onResult)
                 }
@@ -114,12 +118,22 @@ abstract class FireManager<T : Any>(
             val imagePath = generatePath(document)
             val fileRef = storageRef.child(document).child(imagePath)
 
-            val downloadCallback = toDownloadFile(imagePath, onResult)
+            val downloadCallback: (String) -> Unit = {ref ->
+                launch(Dispatchers.IO + Job()) {
+                    try {
+                        download(
+                            ref,
+                            onResult
+                        )
+                    } catch (e: Exception) {
+                        onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
+                    }
+                }
+            }
 
             try {
                 fileRef.putFile(Uri.parse(image)).addOnSuccessListener {
-
-                    downloadCallback()
+                    downloadCallback(it.metadata?.reference.toString())
                 }.addOnFailureListener { exception ->
                     throw exception
                 }
@@ -129,38 +143,22 @@ abstract class FireManager<T : Any>(
         }
     }
 
-    private fun CoroutineScope.toDownloadFile(
-        imagePath: String, onResult: suspend (ResultOf<String>) -> Unit
-    ): () -> Unit {
-        val downloadCallback: () -> Unit = {
-            launch(Dispatchers.IO + Job()) {
-                try {
-                    download(
-                        firebaseAuth.currentUser?.zza()?.options?.storageBucket!!,
-                        imagePath,
-                        onResult
-                    )
-                } catch (e: Exception) {
-                    onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
-                }
-            }
-        }
-        return downloadCallback
-    }
-
-    suspend fun download(
-        bucket: String, filePath: String, onResult: suspend (ResultOf<String>) -> Unit
+    private suspend fun download(
+        ref: String, onResult: suspend (ResultOf<String>) -> Unit
     ) {
         withContext(Dispatchers.IO) {
 
-            val gsReference = storage.getReferenceFromUrl("gs://$bucket/$filePath")
+            val gsReference = storage.getReferenceFromUrl(ref)
 
-            gsReference.downloadUrl.addOnSuccessListener { uri ->
+            val callback: (Uri)-> Unit = {
                 onCoroutineScope(
                     ResultOf.Success(
-                        Uri.parse(uri.normalizeScheme().toString()).toString()
+                        Uri.parse(it.normalizeScheme().toString()).toString()
                     ), onResult
                 )
+            }
+            gsReference.downloadUrl.addOnSuccessListener { uri ->
+                callback(uri)
             }.addOnFailureListener { e ->
                 onCoroutineScope(
                     ResultOf.Failure(message = e.message, throwable = e.cause),
@@ -176,21 +174,29 @@ abstract class FireManager<T : Any>(
         collection2: String,
         document: String,
         model: T,
-        onResult: (ResultOf<T>) -> Unit
+        onResult: suspend (ResultOf<T>) -> Unit
     ) {
-        val data = GymMateModelSerializer<T>().invoke(model)
+        withContext(Dispatchers.IO) {
+            val data = async { GymMateModelSerializer<T>().invoke(model) }.await()
 
-        userId?.let { userId ->
-            firestore.collection(collection1).document(userId).collection(collection2)
-                .document(document).set(data).addOnSuccessListener {
-                    onResult(ResultOf.Success(model))
-                    Log.d(ContentValues.TAG, "DocumentSnapshot successfully written or updated!")
-                }.addOnFailureListener { e ->
-                    onResult(ResultOf.Failure(e.message, e.cause))
-                    Log.w(ContentValues.TAG, "Error writing document", e)
+            val callback: (ResultOf<T>) -> Unit = {
+                launch(Dispatchers.IO +Job()) {
+                    onResult(it)
                 }
-        } ?: run {
-            throw Exception("User is not found")
+            }
+
+            userId?.let { userId ->
+                firestore.collection(collection1).document(userId).collection(collection2)
+                    .document(document).set(data).addOnSuccessListener {
+                        callback(ResultOf.Success(model))
+                        Log.d(ContentValues.TAG, "DocumentSnapshot successfully written or updated!")
+                    }.addOnFailureListener { e ->
+                        callback(ResultOf.Failure(e.message, e.cause))
+                        Log.w(ContentValues.TAG, "Error writing document", e)
+                    }
+            } ?: run {
+                throw Exception("User is not found")
+            }
         }
     }
 
@@ -202,7 +208,7 @@ abstract class FireManager<T : Any>(
         result: ResultOf<R>,
         onResult: suspend (ResultOf<R>) -> Unit
     ) {
-        launch {
+        launch(Dispatchers.IO + Job()) {
             onResult(result)
         }
     }

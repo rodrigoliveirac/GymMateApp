@@ -1,5 +1,6 @@
 package com.rodcollab.gymmateapp.exercises.presentation
 
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -9,6 +10,7 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.EXERCISES
+import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.presentation.screens.AddOrEditExerciseScreen
 import com.rodcollab.gymmateapp.exercises.presentation.screens.BodyPartScreen
 import com.rodcollab.gymmateapp.exercises.presentation.screens.ExercisesScreen
@@ -26,9 +28,13 @@ fun NavGraphBuilder.exercisesGraph(
         )
     }
     composable(route = EXERCISES) {
+        val newExercise = navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<ExerciseExternal?>("newExercise", null)?.collectAsState()
         ExercisesScreen(
-            goTo = { navController.navigate(it)},
-            navigateUp = { navController.navigateUp() },
+            newExercise = newExercise?.value,
+            goTo = { navController.navigate(it) },
+            navigateUp = {
+                navController.navigateUp()
+            },
             sharedViewModel = sharedViewModel
         )
     }
@@ -59,8 +65,12 @@ fun NavGraphBuilder.exercisesGraph(
             })
     ) {
         AddOrEditExerciseScreen(
-            navigateUp = {
-                navController.navigateUp()
+            navigateUp = { newExercise ->
+                navController.previousBackStackEntry?.savedStateHandle?.set<ExerciseExternal?>(
+                    "newExercise",
+                    newExercise
+                )
+                navController.popBackStack()
             }
         )
     }

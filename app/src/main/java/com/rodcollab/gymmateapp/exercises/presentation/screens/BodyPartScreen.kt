@@ -58,6 +58,7 @@ fun BodyPartScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
     Scaffold(
         bottomBar = {
 

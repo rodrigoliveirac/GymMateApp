@@ -1,5 +1,6 @@
 package com.rodcollab.gymmateapp.exercises.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
@@ -20,46 +21,21 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class BPExercisesViewModel @Inject constructor(private val exercises: ExercisesDomain) :
-    ViewModel() {
+class BPExercisesViewModel @Inject constructor(
+    private val exercises: ExercisesDomain,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BPExercisesUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            withContext(Dispatchers.Main) {
-                _uiState.update {
-                    it.copy(isLoading = true)
-                }
-            }
-            exercises.exercises { result ->
-                when (result) {
-                    is ResultOf.Success -> {
-                        withContext(Dispatchers.Main) {
-                            _uiState.update {
-                                it.copy(bpWithExercises = result.value, isLoading = false)
-                            }
-                        }
-                    }
-
-                    is ResultOf.Failure -> {
-                        withContext(Dispatchers.Main) {
-                            _uiState.update {
-                                it.copy(message = result.message, isLoading = false)
-                            }
-                        }
-                    }
-
-                    else -> {
-
-                    }
-                }
-            }
+            updateExercises()
         }
     }
 
-    fun onUiActions(action: BPExercisesUiAction, goTo: (String) -> Unit) {
+    fun onUiActions(action: BPExercisesUiAction, goTo: (String) -> Unit = { }) {
         viewModelScope.launch {
             when (action) {
                 is BPExercisesUiAction.OnBodyPart -> {
@@ -78,6 +54,48 @@ class BPExercisesViewModel @Inject constructor(private val exercises: ExercisesD
                 is BPExercisesUiAction.OnNewExercise -> {
                     goTo("$ADD_OR_EDIT_EXERCISE_SCREEN/ADD?$bodyPartArgs=${_uiState.value.exercisesByBP[0].bodyPart}?${GymMateDestinationsArgs.nameExerciseArgs}={${GymMateDestinationsArgs.nameExerciseArgs}}?${GymMateDestinationsArgs.imgUrlExerciseArgs}={${GymMateDestinationsArgs.imgUrlExerciseArgs}}?${GymMateDestinationsArgs.notesExerciseArgs}={${GymMateDestinationsArgs.notesExerciseArgs}}")
                 }
+
+                is BPExercisesUiAction.UpdateExercises -> {
+                    val newList = _uiState.value.exercisesByBP + action.newExercise
+                    _uiState.update {
+                        it.copy(
+                            exercisesByBP = newList,
+                            isLoading = false
+                        )
+                    }
+                }
+
+            }
+        }
+    }
+
+    private suspend fun updateExercises() {
+        withContext(Dispatchers.Main) {
+            _uiState.update {
+                it.copy(isLoading = true)
+            }
+        }
+        exercises.exercises { result ->
+            when (result) {
+                is ResultOf.Success -> {
+                    withContext(Dispatchers.Main) {
+                        _uiState.update {
+                            it.copy(bpWithExercises = result.value, isLoading = false)
+                        }
+                    }
+                }
+
+                is ResultOf.Failure -> {
+                    withContext(Dispatchers.Main) {
+                        _uiState.update {
+                            it.copy(message = result.message, isLoading = false)
+                        }
+                    }
+                }
+
+                else -> {
+
+                }
             }
         }
     }
@@ -95,6 +113,8 @@ sealed interface BPExercisesUiAction {
     data class OnBodyPart(val bodyPart: BodyPart) : BPExercisesUiAction
 
     data object OnNewExercise : BPExercisesUiAction
+    data class UpdateExercises(val newExercise: ExerciseExternal) : BPExercisesUiAction
+
 
 }
 

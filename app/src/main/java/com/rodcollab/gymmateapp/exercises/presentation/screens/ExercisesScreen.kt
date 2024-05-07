@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -24,11 +23,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -47,18 +46,25 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
+import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesUiAction
 import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesScreen(
+    newExercise : ExerciseExternal?,
     goTo: (String) -> Unit,
     navigateUp: () -> Unit,
     sharedViewModel: BPExercisesViewModel
 ) {
     val uiState by sharedViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    newExercise?.let {
+        LaunchedEffect(Unit) {
+            sharedViewModel.onUiActions(BPExercisesUiAction.UpdateExercises(it))
+        }
+    }
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = { sharedViewModel.onUiActions(BPExercisesUiAction.OnNewExercise) { goTo(it)} }) {
@@ -87,7 +93,10 @@ fun ExercisesScreen(
                 .padding(paddingValues)
         ) {
             if(uiState.isLoading) {
-                Column(Modifier.fillMaxSize().align(Alignment.Center), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "Loading")
                     Spacer(modifier = Modifier.size(8.dp))
                     CircularProgressIndicator(strokeWidth = 2.dp)

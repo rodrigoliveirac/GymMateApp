@@ -15,6 +15,7 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.core.AddOrEdit
 import com.rodcollab.gymmateapp.core.FileUtils
 import com.rodcollab.gymmateapp.core.ResultOf
+import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,7 @@ data class AddOrEditExerciseUiState(
 @HiltViewModel
 class AddOrEditExerciseVm @Inject constructor(
     private val domain: ExercisesDomain,
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val application: Application
 ) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(AddOrEditExerciseUiState())
@@ -66,7 +67,7 @@ class AddOrEditExerciseVm @Inject constructor(
         }
     }
 
-    fun onAddOrEditUiAction(action: AddOrEditExerciseUiAction,navigateUp: ()-> Unit = { }) {
+    fun onAddOrEditUiAction(action: AddOrEditExerciseUiAction, navigateUp: (ExerciseExternal?) -> Unit = { }) {
         viewModelScope.launch {
             when (action) {
                 is AddOrEditExerciseUiAction.OnNameChange -> {
@@ -98,8 +99,10 @@ class AddOrEditExerciseVm @Inject constructor(
                 }
 
                 is AddOrEditExerciseUiAction.OnConfirm -> {
-                    _uiState.update {
-                        it.copy(isLoading = true, message = "Loading")
+                    withContext(Dispatchers.Main) {
+                        _uiState.update {
+                            it.copy(isLoading = true, message = "Loading")
+                        }
                     }
                     domain.addExercise(
                         bodyPart = _uiState.value.bodyPart,
@@ -110,18 +113,27 @@ class AddOrEditExerciseVm @Inject constructor(
                     ) { resultOf ->
                         when (resultOf) {
                             is ResultOf.Success -> {
-                                _uiState.update {
-                                    it.copy(isLoading = false, message = "Exercise Saved")
+                                withContext(Dispatchers.Main) {
+                                    _uiState.update {
+                                        it.copy(isLoading = false, message = "Exercise Saved")
+                                    }
+                                    _uiState.update {
+                                        it.copy(message = null)
+                                    }
+                                    navigateUp(resultOf.value)
                                 }
-                                _uiState.update {
-                                    it.copy(message = null)
-                                }
-                                navigateUp()
                             }
+
                             is ResultOf.Failure -> {
-                                _uiState.update {
-                                    it.copy(isLoading = false, message = resultOf.message)
+                                withContext(Dispatchers.Main) {
+                                    _uiState.update {
+                                        it.copy(isLoading = false, message = resultOf.message)
+                                    }
+                                    _uiState.update {
+                                        it.copy(message = null)
+                                    }
                                 }
+
                             }
 
                             else -> {
@@ -142,7 +154,9 @@ class AddOrEditExerciseVm @Inject constructor(
                         FileUtils.saveBitmapToFile(
                             application,
                             bitmap,
-                            "${_uiState.value.bodyPart}:${_uiState.value.name}:${UUID.randomUUID().toString()}"
+                            "${_uiState.value.bodyPart}:${_uiState.value.name}:${
+                                UUID.randomUUID().toString()
+                            }"
                         )
                     }
                 }
@@ -157,7 +171,9 @@ class AddOrEditExerciseVm @Inject constructor(
 
 sealed interface AddOrEditExerciseUiAction {
     data class OnNameChange(val name: String) : AddOrEditExerciseUiAction
-    data class OnImgBitmapChange(val data: Any?, val uploadFile: (String) -> Unit) : AddOrEditExerciseUiAction
+    data class OnImgBitmapChange(val data: Any?, val uploadFile: (String) -> Unit) :
+        AddOrEditExerciseUiAction
+
     data class OnNotesChange(val notes: String) : AddOrEditExerciseUiAction
     data object OnDelete : AddOrEditExerciseUiAction
     data object OnConfirm : AddOrEditExerciseUiAction

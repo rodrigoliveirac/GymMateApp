@@ -16,7 +16,7 @@ interface ExercisesRepository {
         name: String,
         img: String?,
         notes: String,
-        onResult: (ResultOf<ExerciseExternal>) -> Unit
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
     )
 
     suspend fun delete(document: String, onResult: (ResultOf<String>) -> Unit)
