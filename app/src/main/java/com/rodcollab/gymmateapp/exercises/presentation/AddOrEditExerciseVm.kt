@@ -1,7 +1,6 @@
 package com.rodcollab.gymmateapp.exercises.presentation
 
 import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
@@ -19,13 +18,11 @@ import com.rodcollab.gymmateapp.core.ResultOf
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.util.UUID
 import javax.inject.Inject
 
@@ -54,7 +51,7 @@ class AddOrEditExerciseVm @Inject constructor(
 
     private val exerciseId: String? = savedStateHandle[exerciseIdArgs]
     private val name = savedStateHandle[nameExerciseArgs] ?: ""
-    private val imgUrl = savedStateHandle[imgUrlExerciseArgs] ?: ""
+    private val imgUrl: String? = savedStateHandle[imgUrlExerciseArgs]
     private val notes = savedStateHandle[notesExerciseArgs] ?: ""
 
     init {
@@ -104,7 +101,6 @@ class AddOrEditExerciseVm @Inject constructor(
                     _uiState.update {
                         it.copy(isLoading = true, message = "Loading")
                     }
-                   // val storageBucket = getStorageBucket()
                     domain.addExercise(
                         bodyPart = _uiState.value.bodyPart,
                         document = exerciseId,
@@ -136,16 +132,6 @@ class AddOrEditExerciseVm @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun getStorageBucket(): String {
-
-        val jsonString = application.openFileInput("google-services.json").bufferedReader().use {
-            it.readText()
-        }
-        val json = JSONObject(jsonString)
-        val projectInfo = json.getJSONObject("project_info") as JSONObject
-        return projectInfo.getString("storage_bucket")
     }
 
     private suspend fun getUri(data: Any?): String? {

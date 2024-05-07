@@ -9,7 +9,6 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.EXERCISES
-import com.rodcollab.gymmateapp.exercises.domain.AddOrEditExercise
 import com.rodcollab.gymmateapp.exercises.presentation.screens.AddOrEditExerciseScreen
 import com.rodcollab.gymmateapp.exercises.presentation.screens.BodyPartScreen
 import com.rodcollab.gymmateapp.exercises.presentation.screens.ExercisesScreen
@@ -45,14 +44,14 @@ fun NavGraphBuilder.exercisesGraph(
                 nullable = true
             }, navArgument(GymMateDestinationsArgs.nameExerciseArgs) {
                 type = NavType.StringType
-                defaultValue = ""
+                defaultValue = null
                 nullable = true
             }, navArgument(GymMateDestinationsArgs.imgUrlExerciseArgs) {
                 type = NavType.StringType
                 nullable = true
             }, navArgument(GymMateDestinationsArgs.notesExerciseArgs) {
                 type = NavType.StringType
-                defaultValue = ""
+                defaultValue = null
                 nullable = true
             }, navArgument(GymMateDestinationsArgs.exerciseIdArgs) {
                 type = NavType.StringType
