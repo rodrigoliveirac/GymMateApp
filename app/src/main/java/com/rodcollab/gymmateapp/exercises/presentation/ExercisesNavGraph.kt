@@ -37,7 +37,13 @@ fun NavGraphBuilder.exercisesGraph(
                 "newExercise",
                 null
             )?.collectAsState()
+        val idDeleted =
+            navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<String?>(
+                "idDeleted",
+                null
+            )?.collectAsState()
         ExercisesScreen(
+            idExerciseDeleted = idDeleted?.value,
             newExercise = newExercise?.value,
             goTo = { navController.navigate(it) },
             navigateUp = {
@@ -57,6 +63,7 @@ fun NavGraphBuilder.exercisesGraph(
                 type = NavType.StringType
             }, navArgument(GymMateDestinationsArgs.exerciseIdArgs) {
                 type = NavType.StringType
+                nullable = true
             })
     ) {
         AddOrEditExerciseScreen(
@@ -82,6 +89,13 @@ fun NavGraphBuilder.exercisesGraph(
             )?.collectAsState()
 
         ExerciseDetails(
+            exerciseDeleted = { idDeleted ->
+                navController.previousBackStackEntry?.savedStateHandle?.set<String>(
+                    "idDeleted",
+                    idDeleted
+                )
+                navController.popBackStack()
+            },
             exerciseUpdated = exerciseUpdated?.value,
             navigateUp = {
                 navController.navigateUp()

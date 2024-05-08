@@ -42,7 +42,7 @@ data class AddOrEditExerciseUiState(
 @HiltViewModel
 class AddOrEditExerciseVm @Inject constructor(
     private val domain: ExercisesDomain,
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val application: Application
 ) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(AddOrEditExerciseUiState())
@@ -60,7 +60,7 @@ class AddOrEditExerciseVm @Inject constructor(
         _uiState.update {
             it.copy(
                 name = exercise.name ?: "",
-                imgUrl = exercise.image ?: "",
+                imgUrl = exercise.image,
                 notes = exercise.notes ?: "",
                 bodyPart = bodyPart as String,
                 addOrEditTitle = if (addOrEdit == AddOrEdit.ADD.name) "New exercise" else "Edit exercise"

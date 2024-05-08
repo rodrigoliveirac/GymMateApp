@@ -133,7 +133,7 @@ class ExercisesRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun delete(document: String, onResult: (ResultOf<String>) -> Unit) =
+    override fun delete(document: String, onResult: (ResultOf<String>) -> Unit) =
         delete(EXERCISES_COLLECTION, document, onResult)
 
     override fun getExerciseById(uuid: String): ExerciseExternal = cache[uuid] as ExerciseExternal

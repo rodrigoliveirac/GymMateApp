@@ -50,9 +50,14 @@ import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesUiAction
 import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesViewModel
 
+enum class DropOrInsert {
+    INSERT,
+    DROP
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesScreen(
+    idExerciseDeleted: String?,
     newExercise : ExerciseExternal?,
     goTo: (String) -> Unit,
     navigateUp: () -> Unit,
@@ -60,11 +65,19 @@ fun ExercisesScreen(
 ) {
     val uiState by sharedViewModel.uiState.collectAsState()
     val context = LocalContext.current
-    newExercise?.let {
+
+    idExerciseDeleted?.let {
         LaunchedEffect(Unit) {
-            sharedViewModel.onUiActions(BPExercisesUiAction.UpdateExercises(it))
+            sharedViewModel.onUiActions(BPExercisesUiAction.UpdateExercises(idExercise = it, newExercise = null, DropOrInsert.DROP))
+        }
+    } ?: run {
+        newExercise?.let {
+            LaunchedEffect(Unit) {
+                sharedViewModel.onUiActions(BPExercisesUiAction.UpdateExercises(idExercise = null, newExercise = it, DropOrInsert.INSERT))
+            }
         }
     }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = { sharedViewModel.onUiActions(BPExercisesUiAction.OnNewExercise) { goTo(it)} }) {
@@ -123,7 +136,13 @@ fun ExercisesScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .padding(8.dp)
-                                .clickable { sharedViewModel.onUiActions(BPExercisesUiAction.ExerciseDetails(exercise), goTo) }
+                                .clickable {
+                                    sharedViewModel.onUiActions(
+                                        BPExercisesUiAction.ExerciseDetails(
+                                            exercise
+                                        ), goTo
+                                    )
+                                }
                         ) {
                             val dataImg: Any = exercise.image ?: run {
                                 R.drawable.dumbell

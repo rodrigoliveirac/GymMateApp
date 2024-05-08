@@ -2,6 +2,7 @@ package com.rodcollab.gymmateapp.exercises.domain.di
 
 import com.rodcollab.gymmateapp.exercises.data.ExercisesRepository
 import com.rodcollab.gymmateapp.exercises.domain.AddExerciseImpl
+import com.rodcollab.gymmateapp.exercises.domain.DeleteExerciseImpl
 import com.rodcollab.gymmateapp.exercises.domain.ExercisesByBPImpl
 import com.rodcollab.gymmateapp.exercises.domain.ReadExerciseImpl
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
@@ -25,7 +26,8 @@ object ExercisesDomainModule {
             exercises = ExercisesByBPImpl(
                 exercises = exercisesRepository,
             ),
-            addOrEditExercise = AddExerciseImpl(exercisesRepository)
+            addOrEditExercise = AddExerciseImpl(exercisesRepository),
+            deleteExercise = DeleteExerciseImpl(exercisesRepository)
         )
     }
 }

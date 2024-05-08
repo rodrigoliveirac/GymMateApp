@@ -11,7 +11,9 @@ import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.EXERCISE_DETAILS
 import com.rodcollab.gymmateapp.core.ResultOf
 import com.rodcollab.gymmateapp.core.data.model.BodyPart
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.exerciseIdArgs
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
+import com.rodcollab.gymmateapp.exercises.presentation.screens.DropOrInsert
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,14 +55,39 @@ class BPExercisesViewModel @Inject constructor(
                 }
 
                 is BPExercisesUiAction.OnNewExercise -> {
-                    goTo("$ADD_OR_EDIT_EXERCISE_SCREEN/ADD?$bodyPartArgs=${_uiState.value.exercisesByBP[0].bodyPart}")
+                    goTo("$ADD_OR_EDIT_EXERCISE_SCREEN/ADD?$bodyPartArgs=${_uiState.value.exercisesByBP[0].bodyPart}?$exerciseIdArgs={$exerciseIdArgs}")
                 }
 
                 is BPExercisesUiAction.UpdateExercises -> {
-                    val newList = _uiState.value.exercisesByBP + action.newExercise
                     _uiState.update {
-                        it.copy(exercisesByBP = newList, isLoading = false)
+                        it.copy(isLoading = true)
                     }
+                    when (action.operation) {
+                        DropOrInsert.INSERT -> {
+                            val newList = withContext(Dispatchers.IO) {
+                                _uiState.value.exercisesByBP + action.newExercise!!
+                            }
+                            _uiState.update {
+                                it.copy(exercisesByBP = newList, isLoading = false)
+                            }
+                        }
+
+                        else -> {
+
+                            val newList = withContext(Dispatchers.IO) {
+                                val exercise =
+                                    _uiState.value.exercisesByBP.find { it.uuid == action.idExercise }!!
+                                val exercises = _uiState.value.exercisesByBP.toMutableList()
+                                exercises.remove(exercise)
+                                exercises
+                            }
+
+                            _uiState.update {
+                                it.copy(exercisesByBP = newList, isLoading = false)
+                            }
+                        }
+                    }
+
                 }
 
                 is BPExercisesUiAction.ExerciseDetails -> {
@@ -114,7 +141,11 @@ sealed interface BPExercisesUiAction {
     data class OnBodyPart(val bodyPart: BodyPart) : BPExercisesUiAction
 
     data object OnNewExercise : BPExercisesUiAction
-    data class UpdateExercises(val newExercise: ExerciseExternal) : BPExercisesUiAction
+    data class UpdateExercises(
+        val idExercise: String?,
+        val newExercise: ExerciseExternal?,
+        val operation: DropOrInsert
+    ) : BPExercisesUiAction
 
     data class ExerciseDetails(val exerciseExternal: ExerciseExternal) : BPExercisesUiAction
 }
