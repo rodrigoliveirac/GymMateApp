@@ -20,4 +20,6 @@ interface ExercisesRepository {
     )
 
     suspend fun delete(document: String, onResult: (ResultOf<String>) -> Unit)
+
+    fun getExerciseById(uuid: String): ExerciseExternal
 }

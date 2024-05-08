@@ -45,7 +45,6 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.TRAINING_ROUTE
 import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesUiAction
 import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesViewModel
 
@@ -64,7 +63,7 @@ fun BodyPartScreen(
 
             BottomAppBar {
                 IconButton(
-                    onClick = { goTo(TRAINING_ROUTE) }
+                    onClick = {  }
                 ) {
                     Icon(painter = painterResource(id = R.drawable.baseline_event_note_24), contentDescription = "Training")
                 }

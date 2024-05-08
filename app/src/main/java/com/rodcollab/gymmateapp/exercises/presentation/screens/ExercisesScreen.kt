@@ -123,7 +123,7 @@ fun ExercisesScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .padding(8.dp)
-                                .clickable { }
+                                .clickable { sharedViewModel.onUiActions(BPExercisesUiAction.ExerciseDetails(exercise), goTo) }
                         ) {
                             val dataImg: Any = exercise.image ?: run {
                                 R.drawable.dumbell

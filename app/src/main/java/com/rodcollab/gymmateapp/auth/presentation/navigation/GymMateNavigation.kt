@@ -4,6 +4,7 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.addOrEditArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.bodyPartArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.emailArgs
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.exerciseIdArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.imgUrlExerciseArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.nameExerciseArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.notesExerciseArgs
@@ -11,6 +12,7 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.ADD_TRAINING
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.AUTH_SCREEN
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.EXERCISE_DETAILS
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.TRAININGS
 
 /**
@@ -23,6 +25,7 @@ internal object GymMateScreens {
     const val ADD_OR_EDIT_EXERCISE_SCREEN = "addOrEditExerciseScreen"
     const val TRAININGS = "trainings"
     const val ADD_TRAINING = "addTraining"
+    const val EXERCISE_DETAILS = "exerciseDetails"
 }
 
 /**
@@ -49,4 +52,5 @@ object GymMateDestinations {
     const val ADD_OR_EDIT_EXERCISE_ROUTE = "$ADD_OR_EDIT_EXERCISE_SCREEN/{$addOrEditArgs}?$bodyPartArgs={$bodyPartArgs}?$nameExerciseArgs={$nameExerciseArgs}?$imgUrlExerciseArgs={$imgUrlExerciseArgs}?$notesExerciseArgs={$notesExerciseArgs}"
     const val TRAINING_ROUTE = TRAININGS
     const val ADD_TRAINING_ROUTE = ADD_TRAINING
+    const val EXERCISE_DETAILS_ROUTE = "$EXERCISE_DETAILS/{$exerciseIdArgs}"
 }

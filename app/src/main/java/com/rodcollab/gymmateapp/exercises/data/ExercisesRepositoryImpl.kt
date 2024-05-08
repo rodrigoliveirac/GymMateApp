@@ -24,6 +24,8 @@ class ExercisesRepositoryImpl @Inject constructor(
 ) : ExercisesRepository,
     FireManager<ExerciseExternal>(firebaseAuth, firebaseStore, firebaseStorage) {
 
+    private val cache: HashMap<String, ExerciseExternal> = hashMapOf()
+
     override suspend fun getBodyParts(onResult: suspend (ResultOf<List<BodyPart>>) -> Unit) {
         return withContext(Dispatchers.IO) {
             try {
@@ -44,10 +46,11 @@ class ExercisesRepositoryImpl @Inject constructor(
                 getLocalExercises(bodyPart) { result -> finally(result, exercises) }
 
                 getRemoteExercises(bodyPart) { result ->
-                    withContext(Dispatchers.Unconfined) {
+                    withContext(Dispatchers.IO) {
                         finally(result, exercises)
                     }
                 }
+
                 onResult(ResultOf.Success(exercises))
             } catch (e: Exception) {
                 onResult(ResultOf.Failure(e.message, e.cause))
@@ -61,7 +64,11 @@ class ExercisesRepositoryImpl @Inject constructor(
     ) {
         when (result) {
             is ResultOf.Success -> {
-                exercises.addAll(result.value)
+                val exercisesFromDb = result.value
+                exercises.addAll(exercisesFromDb)
+                exercisesFromDb.forEach { exercise ->
+                    cache[exercise.uuid as String] = exercise
+                }
             }
 
             is ResultOf.Failure -> {
@@ -114,6 +121,8 @@ class ExercisesRepositoryImpl @Inject constructor(
 
     override suspend fun delete(document: String, onResult: (ResultOf<String>) -> Unit) =
         delete(EXERCISES_COLLECTION, document, onResult)
+
+    override fun getExerciseById(uuid: String): ExerciseExternal = cache[uuid] as ExerciseExternal
 
     override suspend fun addOrEditExercise(
         document: String?,

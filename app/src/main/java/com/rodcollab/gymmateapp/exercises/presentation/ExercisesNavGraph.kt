@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.ADD_OR_EDIT_EXERCISE_ROUTE
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
@@ -13,13 +14,16 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.EXER
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.presentation.screens.AddOrEditExerciseScreen
 import com.rodcollab.gymmateapp.exercises.presentation.screens.BodyPartScreen
+import com.rodcollab.gymmateapp.exercises.presentation.screens.ExerciseDetails
 import com.rodcollab.gymmateapp.exercises.presentation.screens.ExercisesScreen
 
 fun NavGraphBuilder.exercisesGraph(
     navController: NavController,
     sharedViewModel: BPExercisesViewModel
 ) {
-    composable(route = GymMateScreens.MAIN_SCREEN) {
+    composable(
+        route = GymMateScreens.MAIN_SCREEN
+    ) {
         BodyPartScreen(
             goTo = { route ->
                 navController.navigate(route)
@@ -28,7 +32,11 @@ fun NavGraphBuilder.exercisesGraph(
         )
     }
     composable(route = EXERCISES) {
-        val newExercise = navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<ExerciseExternal?>("newExercise", null)?.collectAsState()
+        val newExercise =
+            navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<ExerciseExternal?>(
+                "newExercise",
+                null
+            )?.collectAsState()
         ExercisesScreen(
             newExercise = newExercise?.value,
             goTo = { navController.navigate(it) },
@@ -71,6 +79,18 @@ fun NavGraphBuilder.exercisesGraph(
                     newExercise
                 )
                 navController.popBackStack()
+            }
+        )
+    }
+    composable(
+        route = GymMateDestinations.EXERCISE_DETAILS_ROUTE,
+        arguments = listOf(navArgument(name = GymMateDestinationsArgs.exerciseIdArgs) {
+            type = NavType.StringType
+        })
+    ) {
+        ExerciseDetails(
+            navigateUp = {
+                navController.navigateUp()
             }
         )
     }

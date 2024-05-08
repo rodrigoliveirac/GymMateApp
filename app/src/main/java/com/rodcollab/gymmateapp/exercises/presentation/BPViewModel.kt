@@ -7,6 +7,7 @@ import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.bodyPartArgs
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
 import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN
+import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.EXERCISE_DETAILS
 import com.rodcollab.gymmateapp.core.ResultOf
 import com.rodcollab.gymmateapp.core.data.model.BodyPart
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
@@ -58,13 +59,13 @@ class BPExercisesViewModel @Inject constructor(
                 is BPExercisesUiAction.UpdateExercises -> {
                     val newList = _uiState.value.exercisesByBP + action.newExercise
                     _uiState.update {
-                        it.copy(
-                            exercisesByBP = newList,
-                            isLoading = false
-                        )
+                        it.copy(exercisesByBP = newList, isLoading = false)
                     }
                 }
 
+                is BPExercisesUiAction.ExerciseDetails -> {
+                    goTo("$EXERCISE_DETAILS/${action.exerciseExternal.uuid}")
+                }
             }
         }
     }
@@ -115,7 +116,7 @@ sealed interface BPExercisesUiAction {
     data object OnNewExercise : BPExercisesUiAction
     data class UpdateExercises(val newExercise: ExerciseExternal) : BPExercisesUiAction
 
-
+    data class ExerciseDetails(val exerciseExternal: ExerciseExternal) : BPExercisesUiAction
 }
 
 data class BPExercisesUiState(
