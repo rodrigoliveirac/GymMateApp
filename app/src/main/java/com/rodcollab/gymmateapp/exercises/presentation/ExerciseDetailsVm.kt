@@ -45,6 +45,12 @@ class ExerciseDetailsVm @Inject constructor(
                 is ExerciseDetailsUiAction.OnEdit -> {
                     goTo("${GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN}/EDIT?${GymMateDestinationsArgs.bodyPartArgs}=${_uiState.value.exerciseExternal?.bodyPart}?${exerciseIdArgs}=${_uiState.value.exerciseExternal?.uuid}")
                 }
+
+                is ExerciseDetailsUiAction.OnUpdate -> {
+                    _uiState.update {
+                        it.copy(exerciseExternal = action.exercise)
+                    }
+                }
             }
         }
     }

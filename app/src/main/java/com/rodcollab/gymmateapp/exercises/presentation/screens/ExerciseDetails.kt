@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,12 +41,14 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
+import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.presentation.ExerciseDetailsVm
 import com.rodcollab.gymmateapp.exercises.presentation.intent.ExerciseDetailsUiAction
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseDetails(
+    exerciseUpdated:ExerciseExternal?,
     viewModel: ExerciseDetailsVm = hiltViewModel(),
     navigateUp: () -> Unit,
     goTo:(String) -> Unit
@@ -54,6 +57,11 @@ fun ExerciseDetails(
     val context = LocalContext.current
     var exerciseImageIsLoading by remember {
         mutableStateOf(false)
+    }
+    LaunchedEffect(Unit) {
+        exerciseUpdated?.let { exercise ->
+            viewModel.toAction(ExerciseDetailsUiAction.OnUpdate(exercise))
+        }
     }
     Scaffold(topBar = {
         TopAppBar(modifier = Modifier.shadow(elevation = 6.dp), navigationIcon = {

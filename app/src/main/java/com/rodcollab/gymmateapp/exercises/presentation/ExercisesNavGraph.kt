@@ -75,7 +75,14 @@ fun NavGraphBuilder.exercisesGraph(
             type = NavType.StringType
         })
     ) {
+        val exerciseUpdated =
+            navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<ExerciseExternal?>(
+                "newExercise",
+                null
+            )?.collectAsState()
+
         ExerciseDetails(
+            exerciseUpdated = exerciseUpdated?.value,
             navigateUp = {
                 navController.navigateUp()
             }
