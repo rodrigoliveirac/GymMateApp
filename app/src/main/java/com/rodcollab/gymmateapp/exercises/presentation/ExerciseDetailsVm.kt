@@ -39,14 +39,13 @@ class ExerciseDetailsVm @Inject constructor(
         }
     }
 
-    fun toAction(action: ExerciseDetailsUiAction, goTo: (String)-> Unit = { }) {
+    fun toAction(action: ExerciseDetailsUiAction, goTo: (String) -> Unit = { }) {
         viewModelScope.launch {
             when (action) {
                 is ExerciseDetailsUiAction.OnEdit -> {
-                    goTo("${GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN}/EDIT?${GymMateDestinationsArgs.bodyPartArgs}=${_uiState.value.exerciseExternal?.bodyPart}?${GymMateDestinationsArgs.nameExerciseArgs}={${_uiState.value.exerciseExternal?.name}}?${GymMateDestinationsArgs.imgUrlExerciseArgs}={${_uiState.value.exerciseExternal?.image}}?${GymMateDestinationsArgs.notesExerciseArgs}={${_uiState.value.exerciseExternal?.notes}}")
+                    goTo("${GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN}/EDIT?${GymMateDestinationsArgs.bodyPartArgs}=${_uiState.value.exerciseExternal?.bodyPart}?${exerciseIdArgs}=${_uiState.value.exerciseExternal?.uuid}")
                 }
             }
         }
     }
-
 }

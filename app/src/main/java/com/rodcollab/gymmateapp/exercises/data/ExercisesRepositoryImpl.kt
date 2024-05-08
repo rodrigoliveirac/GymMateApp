@@ -89,8 +89,22 @@ class ExercisesRepositoryImpl @Inject constructor(
                     first = "bodyPart",
                     second = bodyPart
                 ), EXERCISES_COLLECTION,
-                onResult
-            )
+            ) { result ->
+                when(result) {
+                    is ResultOf.Success -> {
+                        val userExercises = result.value.map {
+                            it.copy(userExercise = true)
+                        }
+                        onResult(ResultOf.Success(userExercises))
+                    }
+                    is ResultOf.Failure -> {
+                        onResult(result)
+                    }
+                    else -> {
+                        onResult(result)
+                    }
+                }
+            }
         }
     }
 
@@ -169,6 +183,7 @@ class ExercisesRepositoryImpl @Inject constructor(
                 notes = notes,
                 userExercise = true
             )
+            cache[document] = model
             createOrUpdate(USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult)
         }
     }
@@ -220,6 +235,7 @@ class ExercisesRepositoryImpl @Inject constructor(
                             notes = notes,
                             userExercise = true
                         )
+                        cache[document] = model
                         createOrUpdate(
                             USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult
                         )
@@ -259,6 +275,7 @@ class ExercisesRepositoryImpl @Inject constructor(
                                 notes = notes,
                                 userExercise = true
                             )
+                            cache[uuid] = model
                             createOrUpdate(
                                 USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult
                             )
@@ -282,6 +299,7 @@ class ExercisesRepositoryImpl @Inject constructor(
                     notes = notes,
                     userExercise = true
                 )
+                cache[uuid] = model
                 createOrUpdate(USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult)
             }
         }

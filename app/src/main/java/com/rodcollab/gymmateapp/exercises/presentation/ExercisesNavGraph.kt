@@ -55,21 +55,8 @@ fun NavGraphBuilder.exercisesGraph(
                 type = NavType.StringType
             }, navArgument(GymMateDestinationsArgs.bodyPartArgs) {
                 type = NavType.StringType
-                nullable = true
-            }, navArgument(GymMateDestinationsArgs.nameExerciseArgs) {
-                type = NavType.StringType
-                defaultValue = null
-                nullable = true
-            }, navArgument(GymMateDestinationsArgs.imgUrlExerciseArgs) {
-                type = NavType.StringType
-                nullable = true
-            }, navArgument(GymMateDestinationsArgs.notesExerciseArgs) {
-                type = NavType.StringType
-                defaultValue = null
-                nullable = true
             }, navArgument(GymMateDestinationsArgs.exerciseIdArgs) {
                 type = NavType.StringType
-                nullable = true
             })
     ) {
         AddOrEditExerciseScreen(

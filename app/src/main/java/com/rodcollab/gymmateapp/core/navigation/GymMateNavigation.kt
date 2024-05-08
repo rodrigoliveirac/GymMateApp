@@ -49,7 +49,7 @@ object GymMateDestinationsArgs {
 object GymMateDestinations {
     const val SIGNUP_ROUTE = "$AUTH_SCREEN/{$SIGN_PATH}"
     const val SIGNIN_ROUTE = "$AUTH_SCREEN/{$SIGN_PATH}?$emailArgs={$emailArgs}?$passwordArgs={$passwordArgs}"
-    const val ADD_OR_EDIT_EXERCISE_ROUTE = "$ADD_OR_EDIT_EXERCISE_SCREEN/{$addOrEditArgs}?$bodyPartArgs={$bodyPartArgs}?$nameExerciseArgs={$nameExerciseArgs}?$imgUrlExerciseArgs={$imgUrlExerciseArgs}?$notesExerciseArgs={$notesExerciseArgs}"
+    const val ADD_OR_EDIT_EXERCISE_ROUTE = "$ADD_OR_EDIT_EXERCISE_SCREEN/{$addOrEditArgs}?$bodyPartArgs={$bodyPartArgs}?$exerciseIdArgs={$exerciseIdArgs}"
     const val TRAINING_ROUTE = TRAININGS
     const val ADD_TRAINING_ROUTE = ADD_TRAINING
     const val EXERCISE_DETAILS_ROUTE = "$EXERCISE_DETAILS/{$exerciseIdArgs}"

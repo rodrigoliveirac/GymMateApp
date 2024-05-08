@@ -52,16 +52,16 @@ class AddOrEditExerciseVm @Inject constructor(
     private val addOrEdit = checkNotNull(savedStateHandle[addOrEditArgs])
 
     private val exerciseId: String? = savedStateHandle[exerciseIdArgs]
-    private val name = savedStateHandle[nameExerciseArgs] ?: ""
-    private val imgUrl: String? = savedStateHandle[imgUrlExerciseArgs]
-    private val notes = savedStateHandle[notesExerciseArgs] ?: ""
 
     init {
+        val exercise = exerciseId?.let { id ->
+            domain.readExercise(id)
+        } ?: ExerciseExternal()
         _uiState.update {
             it.copy(
-                name = name,
-                imgUrl = imgUrl,
-                notes = notes,
+                name = exercise.name ?: "",
+                imgUrl = exercise.image ?: "",
+                notes = exercise.notes ?: "",
                 bodyPart = bodyPart as String,
                 addOrEditTitle = if (addOrEdit == AddOrEdit.ADD.name) "New exercise" else "Edit exercise"
             )

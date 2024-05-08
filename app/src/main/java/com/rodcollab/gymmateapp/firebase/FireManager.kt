@@ -75,6 +75,8 @@ abstract class FireManager<T : Any>(
                         it.result.documents.map { doc ->
                             list.add(doc.toObject(data::class.java)!!)
                         }
+                        Log.d("EXERCISE_REMOTE", data.toString())
+
                         callback(ResultOf.Success(list))
                         it.exception?.let { e ->
                             callback(ResultOf.Failure(e.message, e.cause))
