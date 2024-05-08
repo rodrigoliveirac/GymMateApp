@@ -19,8 +19,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.rodcollab.gymmateapp.R
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.ADD_TRAINING_ROUTE
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations.ADD_TRAINING_ROUTE
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

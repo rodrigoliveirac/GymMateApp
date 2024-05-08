@@ -7,5 +7,5 @@ import com.rodcollab.gymmateapp.exercises.domain.ReadExercise
 data class ExercisesDomain(
     val readExercise: ReadExercise,
     val exercises: ExercisesByBP,
-    val addExercise: AddOrEditExercise
+    val addOrEditExercise: AddOrEditExercise
 )

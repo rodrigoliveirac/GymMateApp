@@ -25,7 +25,7 @@ object ExercisesDomainModule {
             exercises = ExercisesByBPImpl(
                 exercises = exercisesRepository,
             ),
-            addExercise = AddExerciseImpl(exercisesRepository)
+            addOrEditExercise = AddExerciseImpl(exercisesRepository)
         )
     }
 }

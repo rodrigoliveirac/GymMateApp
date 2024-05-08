@@ -2,13 +2,16 @@ package com.rodcollab.gymmateapp.exercises.presentation.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,12 +41,14 @@ import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
 import com.rodcollab.gymmateapp.exercises.presentation.ExerciseDetailsVm
+import com.rodcollab.gymmateapp.exercises.presentation.intent.ExerciseDetailsUiAction
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseDetails(
     viewModel: ExerciseDetailsVm = hiltViewModel(),
-    navigateUp: () -> Unit
+    navigateUp: () -> Unit,
+    goTo:(String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -58,7 +63,21 @@ fun ExerciseDetails(
                     contentDescription = null
                 )
             }
-        }, title = { Text(text = "Exercise Details") })
+        }, title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(modifier = Modifier.weight(1f), text = "Exercise Details")
+                if(uiState.isEditable) {
+                    IconButton(
+                        modifier = Modifier.padding(end = 8.dp),
+                        onClick = { viewModel.toAction(ExerciseDetailsUiAction.OnEdit, goTo) }) {
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = null)
+                    }
+                }
+            }
+        })
     }) { paddingValues ->
         Box(
             modifier = Modifier
@@ -68,7 +87,8 @@ fun ExerciseDetails(
             Column(
                 Modifier
                     .padding(16.dp)
-                    .fillMaxSize()) {
+                    .fillMaxSize()
+            ) {
                 Box(Modifier.align(Alignment.CenterHorizontally)) {
 
                     AsyncImage(

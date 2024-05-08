@@ -64,8 +64,8 @@ import com.rodcollab.gymmateapp.R
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.core.ui.BasicLoading
 import com.rodcollab.gymmateapp.core.ui.WidgetDialog
-import com.rodcollab.gymmateapp.exercises.presentation.AddOrEditExerciseUiAction
 import com.rodcollab.gymmateapp.exercises.presentation.AddOrEditExerciseVm
+import com.rodcollab.gymmateapp.exercises.presentation.intent.AddOrEditExerciseUiAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

@@ -6,6 +6,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.rodcollab.gymmateapp.auth.presentation.AuthScreen
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
 
 fun NavGraphBuilder.authGraph(navController: NavController) {
     composable(

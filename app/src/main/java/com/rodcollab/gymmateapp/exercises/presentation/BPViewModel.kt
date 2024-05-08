@@ -3,11 +3,11 @@ package com.rodcollab.gymmateapp.exercises.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.bodyPartArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.EXERCISE_DETAILS
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.bodyPartArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.EXERCISE_DETAILS
 import com.rodcollab.gymmateapp.core.ResultOf
 import com.rodcollab.gymmateapp.core.data.model.BodyPart
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal

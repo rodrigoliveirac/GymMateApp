@@ -6,17 +6,18 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.addOrEditArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.bodyPartArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.exerciseIdArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.imgUrlExerciseArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.nameExerciseArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.notesExerciseArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.addOrEditArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.bodyPartArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.exerciseIdArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.imgUrlExerciseArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.nameExerciseArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.notesExerciseArgs
 import com.rodcollab.gymmateapp.core.AddOrEdit
 import com.rodcollab.gymmateapp.core.FileUtils
 import com.rodcollab.gymmateapp.core.ResultOf
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
+import com.rodcollab.gymmateapp.exercises.presentation.intent.AddOrEditExerciseUiAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,7 +105,7 @@ class AddOrEditExerciseVm @Inject constructor(
                             it.copy(isLoading = true, message = "Loading")
                         }
                     }
-                    domain.addExercise(
+                    domain.addOrEditExercise(
                         bodyPart = _uiState.value.bodyPart,
                         document = exerciseId,
                         name = _uiState.value.name,
@@ -167,15 +168,5 @@ class AddOrEditExerciseVm @Inject constructor(
             }
         }
     }
-}
-
-sealed interface AddOrEditExerciseUiAction {
-    data class OnNameChange(val name: String) : AddOrEditExerciseUiAction
-    data class OnImgBitmapChange(val data: Any?, val uploadFile: (String) -> Unit) :
-        AddOrEditExerciseUiAction
-
-    data class OnNotesChange(val notes: String) : AddOrEditExerciseUiAction
-    data object OnDelete : AddOrEditExerciseUiAction
-    data object OnConfirm : AddOrEditExerciseUiAction
 }
 

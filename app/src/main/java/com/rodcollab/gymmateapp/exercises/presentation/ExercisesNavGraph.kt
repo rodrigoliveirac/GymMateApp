@@ -6,11 +6,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.ADD_OR_EDIT_EXERCISE_ROUTE
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.EXERCISES
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations.ADD_OR_EDIT_EXERCISE_ROUTE
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.EXERCISES
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.presentation.screens.AddOrEditExerciseScreen
 import com.rodcollab.gymmateapp.exercises.presentation.screens.BodyPartScreen
@@ -92,6 +92,8 @@ fun NavGraphBuilder.exercisesGraph(
             navigateUp = {
                 navController.navigateUp()
             }
-        )
+        ) { route ->
+            navController.navigate(route)
+        }
     }
 }

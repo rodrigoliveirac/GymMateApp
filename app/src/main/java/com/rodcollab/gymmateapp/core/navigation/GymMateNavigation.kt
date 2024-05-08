@@ -1,19 +1,19 @@
-package com.rodcollab.gymmateapp.auth.presentation.navigation
+package com.rodcollab.gymmateapp.core.navigation
 
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.SIGN_PATH
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.addOrEditArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.bodyPartArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.emailArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.exerciseIdArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.imgUrlExerciseArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.nameExerciseArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.notesExerciseArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.passwordArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.ADD_TRAINING
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.AUTH_SCREEN
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.EXERCISE_DETAILS
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.TRAININGS
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.SIGN_PATH
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.addOrEditArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.bodyPartArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.emailArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.exerciseIdArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.imgUrlExerciseArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.nameExerciseArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.notesExerciseArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.passwordArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.ADD_TRAINING
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.AUTH_SCREEN
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.EXERCISE_DETAILS
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.TRAININGS
 
 /**
  * Screens used in [GymMateDestinations]

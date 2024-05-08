@@ -12,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.ADD_TRAINING_ROUTE
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.SIGNIN_ROUTE
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens.MAIN_SCREEN
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations.ADD_TRAINING_ROUTE
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations.SIGNIN_ROUTE
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.MAIN_SCREEN
 import com.rodcollab.gymmateapp.auth.presentation.navigation.authGraph
 import com.rodcollab.gymmateapp.core.ui.theme.GymMateAppTheme
 import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesViewModel
