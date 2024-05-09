@@ -16,6 +16,7 @@
    
 ### Technologies
 
+- Roboelectric
 - WorkManager
 - Unit Tests
 - Firebase Auth
