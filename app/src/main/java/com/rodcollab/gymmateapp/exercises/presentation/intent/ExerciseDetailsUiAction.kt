@@ -8,5 +8,5 @@ sealed interface ExerciseDetailsUiAction {
 
     data object OnDelete : ExerciseDetailsUiAction
 
-    data class OnDeleteConfirmation(val confirm: Boolean, val callback:(String)-> Unit = { }) : ExerciseDetailsUiAction
+    data class OnDeleteConfirmation(val confirm: Boolean) : ExerciseDetailsUiAction
 }

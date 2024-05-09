@@ -10,8 +10,9 @@ import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations.ADD_OR_EDIT_EXERCISE_ROUTE
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs
 import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
-import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.EXERCISES
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations.EXERCISES_ROUTE
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.bodyPartArgs
 import com.rodcollab.gymmateapp.exercises.presentation.screens.AddOrEditExerciseScreen
 import com.rodcollab.gymmateapp.exercises.presentation.screens.BodyPartScreen
 import com.rodcollab.gymmateapp.exercises.presentation.screens.ExerciseDetails
@@ -19,7 +20,6 @@ import com.rodcollab.gymmateapp.exercises.presentation.screens.ExercisesScreen
 
 fun NavGraphBuilder.exercisesGraph(
     navController: NavController,
-    sharedViewModel: BPExercisesViewModel
 ) {
     composable(
         route = GymMateScreens.MAIN_SCREEN
@@ -27,29 +27,18 @@ fun NavGraphBuilder.exercisesGraph(
         BodyPartScreen(
             goTo = { route ->
                 navController.navigate(route)
-            },
-            viewModel = sharedViewModel
+            }
         )
     }
-    composable(route = EXERCISES) {
-        val newExercise =
-            navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<ExerciseExternal?>(
-                "newExercise",
-                null
-            )?.collectAsState()
-        val idDeleted =
-            navController.currentBackStackEntry?.savedStateHandle?.getStateFlow<String?>(
-                "idDeleted",
-                null
-            )?.collectAsState()
+    composable(
+        route = EXERCISES_ROUTE,
+        arguments = listOf(navArgument(name = bodyPartArgs) { type = NavType.StringType})
+    ) {
         ExercisesScreen(
-            idExerciseDeleted = idDeleted?.value,
-            newExercise = newExercise?.value,
             goTo = { navController.navigate(it) },
             navigateUp = {
                 navController.navigateUp()
-            },
-            sharedViewModel = sharedViewModel
+            }
         )
     }
     composable(
@@ -94,7 +83,7 @@ fun NavGraphBuilder.exercisesGraph(
                     "idDeleted",
                     idDeleted
                 )
-                navController.popBackStack()
+                navController.navigateUp()
             },
             exerciseUpdated = exerciseUpdated?.value,
             navigateUp = {

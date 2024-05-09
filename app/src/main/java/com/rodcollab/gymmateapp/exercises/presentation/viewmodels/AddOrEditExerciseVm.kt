@@ -1,4 +1,4 @@
-package com.rodcollab.gymmateapp.exercises.presentation
+package com.rodcollab.gymmateapp.exercises.presentation.viewmodels
 
 import android.app.Application
 import android.graphics.Bitmap
@@ -9,9 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.addOrEditArgs
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.bodyPartArgs
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.exerciseIdArgs
-import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.imgUrlExerciseArgs
-import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.nameExerciseArgs
-import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.notesExerciseArgs
 import com.rodcollab.gymmateapp.core.AddOrEdit
 import com.rodcollab.gymmateapp.core.FileUtils
 import com.rodcollab.gymmateapp.core.ResultOf

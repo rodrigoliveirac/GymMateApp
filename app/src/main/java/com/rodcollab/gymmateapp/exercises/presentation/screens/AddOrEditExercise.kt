@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -64,7 +63,7 @@ import com.rodcollab.gymmateapp.R
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.core.ui.BasicLoading
 import com.rodcollab.gymmateapp.core.ui.WidgetDialog
-import com.rodcollab.gymmateapp.exercises.presentation.AddOrEditExerciseVm
+import com.rodcollab.gymmateapp.exercises.presentation.viewmodels.AddOrEditExerciseVm
 import com.rodcollab.gymmateapp.exercises.presentation.intent.AddOrEditExerciseUiAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.rodcollab.gymmateapp.exercises.presentation
+package com.rodcollab.gymmateapp.exercises.presentation.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -11,12 +11,10 @@ import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
 import com.rodcollab.gymmateapp.exercises.presentation.intent.ExerciseDetailsUiAction
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 data class ExerciseUiState(
@@ -75,31 +73,24 @@ class ExerciseDetailsVm @Inject constructor(
                         else -> {
 
                             _uiState.update {
-                                it.copy(openDialog = !it.openDialog, isLoading = true)
+                                it.copy(isLoading = true)
                             }
-
-
-                            domain.deleteExercise(exerciseId) { result ->
-                                when (result) {
-                                    is ResultOf.Success -> {
-
-                                        withContext(Dispatchers.Main) {
+                             domain.deleteExercise(id = exerciseId, bodyPart = _uiState.value.exerciseExternal?.bodyPart!!) { result ->
+                                    when (result) {
+                                        is ResultOf.Success -> {
                                             _uiState.update {
-                                                it.copy(isLoading = false)
+                                                it.copy(openDialog = false, isLoading = false, idExerciseDeleted = exerciseId)
                                             }
-                                            action.callback(exerciseId)
+                                        }
+                                        is ResultOf.Failure -> {
+
                                         }
 
-                                    }
-                                    is ResultOf.Failure -> {
+                                        else -> {
 
-                                    }
-
-                                    else -> {
-
+                                        }
                                     }
                                 }
-                            }
                         }
                     }
                 }

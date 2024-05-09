@@ -41,18 +41,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
-import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesUiAction
-import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesViewModel
+import com.rodcollab.gymmateapp.exercises.presentation.intent.BodyPartsUiAction
+import com.rodcollab.gymmateapp.exercises.presentation.viewmodels.BodyPartsVm
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BodyPartScreen(
     goTo: (String) -> Unit,
-    viewModel: BPExercisesViewModel,
+    viewModel: BodyPartsVm = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -100,19 +101,19 @@ fun BodyPartScreen(
                 }
             } else {
                 LazyColumn {
-                    items(uiState.bpWithExercises.keys.toList()) { bodyParty ->
+                    items(uiState.bodyParts, { it.id }) { bodyPart ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp),
                             elevation = CardDefaults.cardElevation(4.dp),
                             onClick = {
-                                viewModel.onUiActions(BPExercisesUiAction.OnBodyPart(bodyParty),goTo)
+                                viewModel.onUiActions(BodyPartsUiAction.OnBodyPart(bodyPart),goTo)
                             }) {
                             Row(modifier = Modifier.padding(8.dp),verticalAlignment = Alignment.CenterVertically) {
                                 Box() {
                                     var isLoading by rememberSaveable { mutableStateOf(false) }
-                                    AsyncImage(model = ImageRequest.Builder(context).data(bodyParty.imgUrl).crossfade(true).build(),
+                                    AsyncImage(model = ImageRequest.Builder(context).data(bodyPart.imgUrl).crossfade(true).build(),
                                         contentDescription = "icon",
                                         contentScale = ContentScale.FillBounds,
                                         modifier = Modifier
@@ -140,7 +141,7 @@ fun BodyPartScreen(
                                     }
                                 }
                                 Spacer(modifier = Modifier.size(8.dp))
-                                Text(fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, text = bodyParty.name.uppercase())
+                                Text(fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium, text = bodyPart.name.uppercase())
                             }
                         }
                     }

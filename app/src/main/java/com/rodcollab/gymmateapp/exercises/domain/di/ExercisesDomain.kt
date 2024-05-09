@@ -3,6 +3,7 @@ package com.rodcollab.gymmateapp.exercises.domain.di
 import com.rodcollab.gymmateapp.exercises.data.ExercisesRepository
 import com.rodcollab.gymmateapp.exercises.domain.AddExerciseImpl
 import com.rodcollab.gymmateapp.exercises.domain.DeleteExerciseImpl
+import com.rodcollab.gymmateapp.exercises.domain.BodyPartsDomainImpl
 import com.rodcollab.gymmateapp.exercises.domain.ExercisesByBPImpl
 import com.rodcollab.gymmateapp.exercises.domain.ReadExerciseImpl
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
@@ -23,9 +24,8 @@ object ExercisesDomainModule {
     ): ExercisesDomain {
         return ExercisesDomain(
             readExercise = ReadExerciseImpl(exercisesRepository),
-            exercises = ExercisesByBPImpl(
-                exercises = exercisesRepository,
-            ),
+            bodyParts = BodyPartsDomainImpl(exercisesRepository),
+            exercisesByBP = ExercisesByBPImpl(exercisesRepository),
             addOrEditExercise = AddExerciseImpl(exercisesRepository),
             deleteExercise = DeleteExerciseImpl(exercisesRepository)
         )

@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.decode.GifDecoder
@@ -47,40 +49,34 @@ import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
-import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesUiAction
-import com.rodcollab.gymmateapp.exercises.presentation.BPExercisesViewModel
+import com.rodcollab.gymmateapp.exercises.presentation.intent.ExercisesUiAction
+import com.rodcollab.gymmateapp.exercises.presentation.viewmodels.ExercisesVm
 
-enum class DropOrInsert {
-    INSERT,
-    DROP
-}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesScreen(
-    idExerciseDeleted: String?,
-    newExercise : ExerciseExternal?,
     goTo: (String) -> Unit,
+    viewModel: ExercisesVm = hiltViewModel(),
     navigateUp: () -> Unit,
-    sharedViewModel: BPExercisesViewModel
 ) {
-    val uiState by sharedViewModel.uiState.collectAsState()
-    val context = LocalContext.current
 
-    idExerciseDeleted?.let {
-        LaunchedEffect(Unit) {
-            sharedViewModel.onUiActions(BPExercisesUiAction.UpdateExercises(idExercise = it, newExercise = null, DropOrInsert.DROP))
-        }
-    } ?: run {
-        newExercise?.let {
-            LaunchedEffect(Unit) {
-                sharedViewModel.onUiActions(BPExercisesUiAction.UpdateExercises(idExercise = null, newExercise = it, DropOrInsert.INSERT))
-            }
-        }
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.onUiActions(
+            ExercisesUiAction.UpdateExercises
+        )
     }
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { sharedViewModel.onUiActions(BPExercisesUiAction.OnNewExercise) { goTo(it)} }) {
+            FloatingActionButton(onClick = {
+                viewModel.onUiActions(ExercisesUiAction.OnNewExercise) {
+                    goTo(
+                        it
+                    )
+                }
+            }) {
                 Image(imageVector = Icons.Default.Add, contentDescription = null)
             }
         },
@@ -105,71 +101,93 @@ fun ExercisesScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if(uiState.isLoading) {
+            if (uiState.isLoading) {
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .align(Alignment.Center), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                        .align(Alignment.Center),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(text = "Loading")
                     Spacer(modifier = Modifier.size(8.dp))
                     CircularProgressIndicator(strokeWidth = 2.dp)
                 }
             } else {
-                LazyVerticalGrid(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp), columns = GridCells.Fixed(2)
-                ) {
-                    items(uiState.exercisesByBP) { exercise ->
-                        val imageLoader = ImageLoader.Builder(context)
-                            .components {
-                                if (SDK_INT >= 28) {
-                                    add(ImageDecoderDecoder.Factory())
-                                } else {
-                                    add(GifDecoder.Factory())
-                                }
-                            }
-                            .build()
-                        Card(
-                            elevation = CardDefaults.cardElevation(8.dp),
-                            colors = CardDefaults.cardColors(Color.White),
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .padding(8.dp)
-                                .clickable {
-                                    sharedViewModel.onUiActions(
-                                        BPExercisesUiAction.ExerciseDetails(
-                                            exercise
-                                        ), goTo
-                                    )
-                                }
-                        ) {
-                            val dataImg: Any = exercise.image ?: run {
-                                R.drawable.dumbell
-                            }
-                            AsyncImage(
+                ExerciseList(uiState.exercises) { id ->
+                    viewModel.onUiActions(
+                        ExercisesUiAction.ExerciseDetails(
+                            id
+                        ), goTo
+                    )
+                }
+            }
+        }
+    }
+}
 
-                                modifier = Modifier.align(Alignment.CenterHorizontally),
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(dataImg)
-                                    .build(),
-                                imageLoader = imageLoader,
-                                contentDescription = null
-                            )
-                            Spacer(modifier = Modifier.size(8.dp))
-                            Text(
-                                fontWeight = FontWeight.Light,
-                                modifier = Modifier
-                                    .align(Alignment.CenterHorizontally)
-                                    .padding(8.dp),
-                                textAlign = TextAlign.Center,
-                                fontSize = 14.sp,
-                                text = exercise.name ?: "",
-                                maxLines = 1
-                            )
-                        }
+@Composable
+private fun ExerciseList(
+    exercises: List<ExerciseExternal>,
+    goTo: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .components {
+                if (SDK_INT >= 28) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
+                }
+            }
+            .build()
+    }
+    LazyVerticalGrid(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp), columns = GridCells.Fixed(2)
+    ) {
+        items(exercises, { it.uuid as String }) { exercise ->
+
+            val click = remember {
+                Modifier.clickable {
+                    goTo(exercise.uuid!!)
+                }
+            }
+            Card(
+                elevation = CardDefaults.cardElevation(8.dp),
+                colors = CardDefaults.cardColors(Color.White),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .padding(8.dp)
+                    .then(click)
+            ) {
+                val dataImg: Any = remember {
+                    exercise.image ?: run {
+                        R.drawable.dumbell
                     }
                 }
+                AsyncImage(
+
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(dataImg)
+                        .build(),
+                    imageLoader = imageLoader,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    fontWeight = FontWeight.Light,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(8.dp),
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
+                    text = exercise.name ?: "",
+                    maxLines = 1
+                )
             }
         }
     }

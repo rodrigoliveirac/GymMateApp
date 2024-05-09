@@ -22,7 +22,7 @@ abstract class FireManager<T : Any>(
 ) {
 
     var userId: String? = firebaseAuth.currentUser?.uid
-    fun delete(
+    fun deleteDocument(
         collection: String,
         document: String,
         onResult: (ResultOf<String>) -> Unit

@@ -1,6 +1,5 @@
 package com.rodcollab.gymmateapp.exercises.presentation.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +47,7 @@ import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.core.ui.BasicLoading
-import com.rodcollab.gymmateapp.exercises.presentation.ExerciseDetailsVm
+import com.rodcollab.gymmateapp.exercises.presentation.viewmodels.ExerciseDetailsVm
 import com.rodcollab.gymmateapp.exercises.presentation.intent.ExerciseDetailsUiAction
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +72,13 @@ fun ExerciseDetails(
     if (uiState.isLoading) {
         BasicLoading(title = "Deleting")
     }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(uiState.idExerciseDeleted) {
+        uiState.idExerciseDeleted?.let {
+            exerciseDeleted(it)
+        }
+    }
 
     if(uiState.openDialog) {
         AlertDialog(
@@ -92,9 +98,7 @@ fun ExerciseDetails(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.toAction(ExerciseDetailsUiAction.OnDeleteConfirmation(confirm = true) {
-                            exerciseDeleted(it)
-                    })
+                    viewModel.toAction(ExerciseDetailsUiAction.OnDeleteConfirmation(confirm = true))
                 }) {
                     Text(text = "Confirm")
                 }

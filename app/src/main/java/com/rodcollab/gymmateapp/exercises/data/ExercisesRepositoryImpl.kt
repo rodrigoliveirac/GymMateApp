@@ -25,6 +25,7 @@ class ExercisesRepositoryImpl @Inject constructor(
     FireManager<ExerciseExternal>(firebaseAuth, firebaseStore, firebaseStorage) {
 
     private val cache: HashMap<String, ExerciseExternal> = hashMapOf()
+    private val bodyPartToExercisesCache: HashMap<String, List<ExerciseExternal>> = hashMapOf()
 
     override suspend fun getBodyParts(onResult: suspend (ResultOf<List<BodyPart>>) -> Unit) {
         return withContext(Dispatchers.IO) {
@@ -36,31 +37,35 @@ class ExercisesRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getExerciseByBodyPart(
-        bodyPart: String, onResult: suspend (ResultOf<List<ExerciseExternal>>) -> Unit
+    override suspend fun bodyPartToExercisesCache(): Map<String, List<ExerciseExternal>> =
+        bodyPartToExercisesCache
+
+    override suspend fun updateBPToExercises(
+        onResult: suspend () -> Unit
     ) {
         withContext(Dispatchers.IO) {
             try {
                 val exercises = mutableListOf<ExerciseExternal>()
 
-                getLocalExercises(bodyPart) { result -> finally(result, exercises) }
-
-                getRemoteExercises(bodyPart) { result ->
-                    withContext(Dispatchers.IO) {
-                        finally(result, exercises)
+                bodyPartDao.getAll().map {
+                    getLocalExercises(it.name) { result -> finally(result, exercises, it.name) }
+                    getRemoteExercises(it.name) { result ->
+                        withContext(Dispatchers.IO) {
+                            finally(result, exercises, it.name)
+                        }
                     }
                 }
-
-                onResult(ResultOf.Success(exercises))
+                onResult()
             } catch (e: Exception) {
-                onResult(ResultOf.Failure(e.message, e.cause))
+                throw e
             }
         }
     }
 
     private fun finally(
         result: ResultOf<List<ExerciseExternal>>,
-        exercises: MutableList<ExerciseExternal>
+        exercises: MutableList<ExerciseExternal>,
+        bodyPart: String
     ) {
         when (result) {
             is ResultOf.Success -> {
@@ -68,6 +73,13 @@ class ExercisesRepositoryImpl @Inject constructor(
                 exercises.addAll(exercisesFromDb)
                 exercisesFromDb.forEach { exercise ->
                     cache[exercise.uuid as String] = exercise
+                }
+                bodyPartToExercisesCache[bodyPart]?.let { cache ->
+                    val exercises = cache.toMutableList()
+                    exercises.addAll(exercisesFromDb)
+                    bodyPartToExercisesCache[bodyPart] = exercises.toList()
+                } ?: run {
+                    bodyPartToExercisesCache[bodyPart] = exercisesFromDb
                 }
             }
 
@@ -88,18 +100,21 @@ class ExercisesRepositoryImpl @Inject constructor(
                 filterPair = Pair(
                     first = "bodyPart",
                     second = bodyPart
-                ), EXERCISES_COLLECTION,
+                ),
+                EXERCISES_COLLECTION,
             ) { result ->
-                when(result) {
+                when (result) {
                     is ResultOf.Success -> {
                         val userExercises = result.value.map {
                             it.copy(userExercise = true)
                         }
                         onResult(ResultOf.Success(userExercises))
                     }
+
                     is ResultOf.Failure -> {
                         onResult(result)
                     }
+
                     else -> {
                         onResult(result)
                     }
@@ -133,10 +148,19 @@ class ExercisesRepositoryImpl @Inject constructor(
     }
 
 
-    override fun delete(document: String, onResult: (ResultOf<String>) -> Unit) =
-        delete(EXERCISES_COLLECTION, document, onResult)
+    override fun delete(document: String, bodyPart: String, onResult: (ResultOf<String>) -> Unit) {
+        cache.remove(document)
+        val list = bodyPartToExercisesCache[bodyPart]?.toMutableList()
+        val exercise = list?.find { it.uuid == document }
+        list?.remove(exercise)
+        bodyPartToExercisesCache[bodyPart] = list?.toList() as List<ExerciseExternal>
+        deleteDocument(EXERCISES_COLLECTION, document, onResult)
+    }
+
 
     override fun getExerciseById(uuid: String): ExerciseExternal = cache[uuid] as ExerciseExternal
+    override suspend fun getExerciseByBPCache(bodyPartId: String): List<ExerciseExternal> =
+        bodyPartToExercisesCache[bodyPartId] as List<ExerciseExternal>
 
     override suspend fun addOrEditExercise(
         document: String?,
@@ -184,8 +208,17 @@ class ExercisesRepositoryImpl @Inject constructor(
                 userExercise = true
             )
             cache[document] = model
+            updateBpToExercisesCache(bodyPart, model)
             createOrUpdate(USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult)
         }
+    }
+
+    private fun updateBpToExercisesCache(
+        bodyPart: String,
+        model: ExerciseExternal
+    ) {
+        val list = bodyPartToExercisesCache[bodyPart]?.toMutableList()?.plus(model)
+        bodyPartToExercisesCache[bodyPart] = list?.toList() as List<ExerciseExternal>
     }
 
     private suspend fun deleteFile(
@@ -236,6 +269,7 @@ class ExercisesRepositoryImpl @Inject constructor(
                             userExercise = true
                         )
                         cache[document] = model
+                        updateBpToExercisesCache(bodyPart, model)
                         createOrUpdate(
                             USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult
                         )
@@ -276,6 +310,7 @@ class ExercisesRepositoryImpl @Inject constructor(
                                 userExercise = true
                             )
                             cache[uuid] = model
+                            updateBpToExercisesCache(bodyPart, model)
                             createOrUpdate(
                                 USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult
                             )
@@ -300,6 +335,7 @@ class ExercisesRepositoryImpl @Inject constructor(
                     userExercise = true
                 )
                 cache[uuid] = model
+                updateBpToExercisesCache(bodyPart, model)
                 createOrUpdate(USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult)
             }
         }

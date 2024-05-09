@@ -5,13 +5,11 @@ import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.addOrEdi
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.bodyPartArgs
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.emailArgs
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.exerciseIdArgs
-import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.imgUrlExerciseArgs
-import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.nameExerciseArgs
-import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.notesExerciseArgs
 import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.passwordArgs
 import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.ADD_OR_EDIT_EXERCISE_SCREEN
 import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.ADD_TRAINING
 import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.AUTH_SCREEN
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.EXERCISES
 import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.EXERCISE_DETAILS
 import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.TRAININGS
 
@@ -53,4 +51,5 @@ object GymMateDestinations {
     const val TRAINING_ROUTE = TRAININGS
     const val ADD_TRAINING_ROUTE = ADD_TRAINING
     const val EXERCISE_DETAILS_ROUTE = "$EXERCISE_DETAILS/{$exerciseIdArgs}"
+    const val EXERCISES_ROUTE = "$EXERCISES/{$bodyPartArgs}"
 }
