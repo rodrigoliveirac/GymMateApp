@@ -1,39 +1,31 @@
 package com.rodcollab.gymmateapp.exercises.data
 
-import android.content.ContentValues.TAG
-import android.net.Uri
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.rodcollab.gymmateapp.core.Collections.EXERCISES_COLLECTION
 import com.rodcollab.gymmateapp.core.ResultOf
 import com.rodcollab.gymmateapp.core.data.dao.BodyPartDao
 import com.rodcollab.gymmateapp.core.data.dao.ExerciseDao
 import com.rodcollab.gymmateapp.core.data.model.BodyPart
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
+import com.rodcollab.gymmateapp.firebase.FireManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
 class ExercisesRepositoryImpl @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
-    private val storage: FirebaseStorage,
-    private val firestore: FirebaseFirestore,
+    firebaseAuth: FirebaseAuth,
+    firebaseStore: FirebaseFirestore,
+    firebaseStorage: FirebaseStorage,
     private val exerciseDao: ExerciseDao,
     private val bodyPartDao: BodyPartDao,
-) : ExercisesRepository {
+) : ExercisesRepository,
+    FireManager<ExerciseExternal>(firebaseAuth, firebaseStore, firebaseStorage) {
+
+    private val cache: HashMap<String, ExerciseExternal> = hashMapOf()
+    private val bodyPartToExercisesCache: HashMap<String, List<ExerciseExternal>> = hashMapOf()
 
     override suspend fun getBodyParts(onResult: suspend (ResultOf<List<BodyPart>>) -> Unit) {
         return withContext(Dispatchers.IO) {
@@ -45,49 +37,100 @@ class ExercisesRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun userExercises(
-        bodyPart: String,
-        onResult: (ResultOf<List<ExerciseExternal>>) -> Unit
+    override suspend fun bodyPartToExercisesCache(): Map<String, List<ExerciseExternal>> =
+        bodyPartToExercisesCache
+
+    override suspend fun updateBPToExercises(
+        onResult: suspend () -> Unit
     ) {
         withContext(Dispatchers.IO) {
-            val callback: (List<DocumentSnapshot>?)-> Unit = {
-                launch(Dispatchers.IO + Job()) {
-                    onResult(ResultOf.Success( async {
-                        it?.map {
-                            ExerciseExternal(
-                                uuid = it.getString("uuid")!!.toString(),
-                                name = it.getString("name")!!.toString(),
-                                bodyPart = it.getString("bodyPart")!!.toString(),
-                                image = it.getString("image") as String?,
-                                notes = it.getString("notes")!!.toString(),
-                                userExercise = true
-                            )
-                        }!!
-                    }.await()))
-                }
-            }
-            firebaseAuth.currentUser?.uid?.let {
-                firestore.collection(USERS_COLLECTION)
-                    .document(it)
-                    .collection(EXERCISES_COLLECTION)
-                    .whereEqualTo("bodyPart", bodyPart).addSnapshotListener { value, error ->
-                        callback(value?.documents)
+            try {
+                val exercises = mutableListOf<ExerciseExternal>()
 
-                        error?.let {
-                            onResult(ResultOf.Failure(it.message, it.cause))
+                bodyPartDao.getAll().map {
+                    getLocalExercises(it.name) { result -> finally(result, exercises, it.name) }
+                    getRemoteExercises(it.name) { result ->
+                        withContext(Dispatchers.IO) {
+                            finally(result, exercises, it.name)
                         }
                     }
+                }
+                onResult()
+            } catch (e: Exception) {
+                throw e
             }
         }
     }
 
-    override suspend fun getExerciseByBodyPart(
+    private fun finally(
+        result: ResultOf<List<ExerciseExternal>>,
+        exercises: MutableList<ExerciseExternal>,
+        bodyPart: String
+    ) {
+        when (result) {
+            is ResultOf.Success -> {
+                val exercisesFromDb = result.value
+                exercises.addAll(exercisesFromDb)
+                exercisesFromDb.forEach { exercise ->
+                    cache[exercise.uuid as String] = exercise
+                }
+                bodyPartToExercisesCache[bodyPart]?.let { cache ->
+                    val exercises = cache.toMutableList()
+                    exercises.addAll(exercisesFromDb)
+                    bodyPartToExercisesCache[bodyPart] = exercises.toList()
+                } ?: run {
+                    bodyPartToExercisesCache[bodyPart] = exercisesFromDb
+                }
+            }
+
+            is ResultOf.Failure -> {
+                ResultOf.Failure(result.message, result.throwable)
+            }
+
+            else -> {}
+        }
+    }
+
+    private suspend fun getRemoteExercises(
+        bodyPart: String,
+        onResult: suspend (ResultOf<List<ExerciseExternal>>) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            filterCollection(
+                filterPair = Pair(
+                    first = "bodyPart",
+                    second = bodyPart
+                ),
+                EXERCISES_COLLECTION,
+            ) { result ->
+                when (result) {
+                    is ResultOf.Success -> {
+                        val userExercises = result.value.map {
+                            it.copy(userExercise = true)
+                        }
+                        onResult(ResultOf.Success(userExercises))
+                    }
+
+                    is ResultOf.Failure -> {
+                        onResult(result)
+                    }
+
+                    else -> {
+                        onResult(result)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun getLocalExercises(
         bodyPart: String,
         onResult: (ResultOf<List<ExerciseExternal>>) -> Unit
     ) {
-        withContext(Dispatchers.IO) {
-            try {
-                onResult(ResultOf.Success(exerciseDao.getByBodyPart(bodyPart).map {
+        try {
+            val list = mutableListOf<ExerciseExternal>()
+            exerciseDao.getByBodyPart(bodyPart).map {
+                list.add(
                     ExerciseExternal(
                         uuid = it.id.toString(),
                         userExercise = false,
@@ -96,35 +139,28 @@ class ExercisesRepositoryImpl @Inject constructor(
                         notes = it.notes,
                         image = it.image
                     )
-                }))
-            }catch (e:Exception) {
-                onResult(ResultOf.Failure(e.message,e.cause))
+                )
             }
-        }
-    }
-
-    override suspend fun delete(document: String, onResult: (ResultOf<String>) -> Unit) {
-        try {
-            firebaseAuth.currentUser?.uid?.let { userId ->
-                firestore
-                    .collection(USERS_COLLECTION)
-                    .document(userId)
-                    .collection(EXERCISES_COLLECTION)
-                    .document(document)
-                    .delete()
-                    .addOnSuccessListener {
-                        onResult(ResultOf.Success("Exercise successfully deleted!"))
-                        Log.d(TAG, "DocumentSnapshot successfully deleted!")
-                    }
-                    .addOnFailureListener { e ->
-                        onResult(ResultOf.Failure(e.message, e.cause))
-                        Log.w(TAG, "Error deleting document", e)
-                    }
-            }
+            onResult(ResultOf.Success(list))
         } catch (e: Exception) {
             onResult(ResultOf.Failure(e.message, e.cause))
         }
     }
+
+
+    override fun delete(document: String, bodyPart: String, onResult: (ResultOf<String>) -> Unit) {
+        cache.remove(document)
+        val list = bodyPartToExercisesCache[bodyPart]?.toMutableList()
+        val exercise = list?.find { it.uuid == document }
+        list?.remove(exercise)
+        bodyPartToExercisesCache[bodyPart] = list?.toList() as List<ExerciseExternal>
+        deleteDocument(EXERCISES_COLLECTION, document, onResult)
+    }
+
+
+    override fun getExerciseById(uuid: String): ExerciseExternal = cache[uuid] as ExerciseExternal
+    override suspend fun getExerciseByBPCache(bodyPartId: String): List<ExerciseExternal> =
+        bodyPartToExercisesCache[bodyPartId] as List<ExerciseExternal>
 
     override suspend fun addOrEditExercise(
         document: String?,
@@ -132,128 +168,181 @@ class ExercisesRepositoryImpl @Inject constructor(
         name: String,
         img: String?,
         notes: String,
-        onResult: (ResultOf<ExerciseExternal>) -> Unit
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
     ) {
         withContext(Dispatchers.IO) {
             try {
-
-                val uuid = document ?: run {
-                    UUID.randomUUID().toString()
-                }
-
-                val storageRef = storage.reference
-                val fileRef =
-                    storageRef.child(uuid).child("${uuid}.pdf")
-
-                var imgUrl: String? = null
-
-                val updateImgUrl: (String?) -> Unit = { imgUrl = it }
-
-                val onResultFileSaved: (ResultOf<String>?) -> Unit = {
-                    it?.let {
-                        launch(Dispatchers.IO + Job()) {
-                            firebaseAuth.currentUser?.zza()?.options?.storageBucket?.let {
-                                downloadFile(it, uuid) { res ->
-                                    when (res) {
-                                        is ResultOf.Success -> {
-                                            updateImgUrl(res.value)
-                                        }
-
-                                        is ResultOf.Failure -> {
-                                            updateImgUrl(null)
-                                        }
-
-                                        else -> {
-
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                img?.let { image ->
-                    async {
-                        fileRef.putFile(Uri.parse(image))
-                            .addOnSuccessListener {
-                                onResultFileSaved(ResultOf.Success(image))
-                            }.addOnFailureListener { exception ->
-                                throw exception
-                            }
-                    }.await()
-                }
-
-                val data = hashMapOf<String, Any?>(
-                    "uuid" to uuid,
-                    "name" to name,
-                    "bodyPart" to bodyPart,
-                    "image" to img,
-                    "notes" to notes
-                )
-                firebaseAuth.currentUser?.uid?.let { userId ->
-                    firestore
-                        .collection(USERS_COLLECTION)
-                        .document(userId)
-                        .collection(EXERCISES_COLLECTION)
-                        .document(uuid)
-                        .set(data)
-                        .addOnSuccessListener {
-                            onResult(
-                                ResultOf.Success(
-                                    ExerciseExternal(
-                                        uuid = uuid,
-                                        name = name,
-                                        image = img,
-                                        bodyPart = bodyPart,
-                                        notes = notes,
-                                        userExercise = true,
-                                    )
-                                )
-                            )
-                            Log.d(TAG, "DocumentSnapshot successfully written!")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w(TAG, "Error writing document", e)
-                        }
+                document?.let { doc ->
+                    editExercise(doc, img, name, bodyPart, notes, onResult)
                 } ?: run {
-                    throw Exception("User is not found")
+                    createExercise(img, name, bodyPart, notes, onResult)
                 }
-
             } catch (e: Exception) {
                 onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
             }
         }
     }
 
-    private suspend fun downloadFile(
-        storageBucket: String,
-        child: String,
-        onResult: (ResultOf<String>) -> Unit
+    private suspend fun editExercise(
+        document: String,
+        img: String?,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
+    ) {
+
+        img?.let { image ->
+            if (image.contains("file")) {
+                uploadFile(image, document, name, bodyPart, notes, onResult)
+            } else {
+                deleteFile(document, image, name, bodyPart, notes, onResult)
+            }
+        } ?: run {
+            val model = ExerciseExternal(
+                uuid = document,
+                name = name,
+                image = img,
+                bodyPart = bodyPart,
+                notes = notes,
+                userExercise = true
+            )
+            cache[document] = model
+            updateBpToExercisesCache(bodyPart, model)
+            createOrUpdate(USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult)
+        }
+    }
+
+    private fun updateBpToExercisesCache(
+        bodyPart: String,
+        model: ExerciseExternal
+    ) {
+        val list = bodyPartToExercisesCache[bodyPart]?.toMutableList()?.plus(model)
+        bodyPartToExercisesCache[bodyPart] = list?.toList() as List<ExerciseExternal>
+    }
+
+    private suspend fun deleteFile(
+        document: String,
+        image: String,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
     ) {
         withContext(Dispatchers.IO) {
+            deleteFile(document) { result ->
+                when (result) {
+                    is ResultOf.Success -> {
+                        uploadFile(image, document, name, bodyPart, notes, onResult)
+                    }
 
-            val ref =
-                storage.getReferenceFromUrl("gs://$storageBucket/$child/$child.pdf")
+                    is ResultOf.Failure -> {
+                        onResult(result)
+                    }
 
-            ref.downloadUrl.addOnSuccessListener {
-                onResult(
-                    ResultOf.Success(
-                        Uri.parse(it.normalizeScheme().toString()).toString()
-                    )
-                )
-            }
-                .addOnFailureListener {
-                    onResult(ResultOf.Failure(message = it.message, throwable = it.cause))
+                    else -> {
+                        throw Exception("Unknown Error")
+                    }
                 }
+            }
+        }
+    }
 
+    private suspend fun uploadFile(
+        image: String,
+        document: String,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            upload(image = image, document = document) { result ->
+                when (result) {
+                    is ResultOf.Success -> {
+                        val model = ExerciseExternal(
+                            uuid = document,
+                            name = name,
+                            image = result.value,
+                            bodyPart = bodyPart,
+                            notes = notes,
+                            userExercise = true
+                        )
+                        cache[document] = model
+                        updateBpToExercisesCache(bodyPart, model)
+                        createOrUpdate(
+                            USERS_COLLECTION, EXERCISES_COLLECTION, document, model, onResult
+                        )
+                    }
 
+                    is ResultOf.Failure -> {
+                        onResult(result)
+                    }
+
+                    else -> {
+                        throw Exception("Unknown exception")
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun createExercise(
+        img: String?,
+        name: String,
+        bodyPart: String,
+        notes: String,
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            val uuid = UUID.randomUUID().toString()
+
+            img?.let { image ->
+                upload(image, uuid) { result ->
+                    when (result) {
+                        is ResultOf.Success -> {
+                            val model = ExerciseExternal(
+                                uuid = uuid,
+                                name = name,
+                                image = result.value,
+                                bodyPart = bodyPart,
+                                notes = notes,
+                                userExercise = true
+                            )
+                            cache[uuid] = model
+                            updateBpToExercisesCache(bodyPart, model)
+                            createOrUpdate(
+                                USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult
+                            )
+                        }
+
+                        is ResultOf.Failure -> {
+                            onResult(result)
+                        }
+
+                        else -> {
+                            throw Exception("Unknown exception")
+                        }
+                    }
+                }
+            } ?: run {
+                val model = ExerciseExternal(
+                    uuid = uuid,
+                    name = name,
+                    image = img,
+                    bodyPart = bodyPart,
+                    notes = notes,
+                    userExercise = true
+                )
+                cache[uuid] = model
+                updateBpToExercisesCache(bodyPart, model)
+                createOrUpdate(USERS_COLLECTION, EXERCISES_COLLECTION, uuid, model, onResult)
+            }
         }
     }
 
     companion object {
         const val USERS_COLLECTION = "USERS_COLLECTION"
-        const val EXERCISES_COLLECTION = "EXERCISES_COLLECTION"
     }
 
 }

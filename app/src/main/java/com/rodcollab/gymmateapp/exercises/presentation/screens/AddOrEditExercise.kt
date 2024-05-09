@@ -1,13 +1,11 @@
 package com.rodcollab.gymmateapp.exercises.presentation.screens
 
-import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +45,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -58,24 +55,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
+import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.core.ui.BasicLoading
 import com.rodcollab.gymmateapp.core.ui.WidgetDialog
-import com.rodcollab.gymmateapp.exercises.presentation.AddOrEditExerciseUiAction
-import com.rodcollab.gymmateapp.exercises.presentation.AddOrEditExerciseVm
+import com.rodcollab.gymmateapp.exercises.presentation.viewmodels.AddOrEditExerciseVm
+import com.rodcollab.gymmateapp.exercises.presentation.intent.AddOrEditExerciseUiAction
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddOrEditExerciseScreen(
-    navigateUp: () -> Unit,
+    navigateUp: (ExerciseExternal?) -> Unit,
     viewModel: AddOrEditExerciseVm = hiltViewModel()
 ) {
 
@@ -205,7 +201,7 @@ fun AddOrEditExerciseScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { navigateUp() }) {
+                    IconButton(onClick = { navigateUp(null) }) {
                         Image(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
                             contentDescription = null
@@ -226,11 +222,6 @@ fun AddOrEditExerciseScreen(
                     .fillMaxSize()) {
                 Box(Modifier.align(Alignment.CenterHorizontally)) {
 
-                    val dataImg: Any? = if(uiState.imgUrl != "imgUrl") {
-                        uiState.imgUrl
-                    } else {
-                        R.drawable.photo_placeholder
-                    }
                     AsyncImage(
                         modifier = Modifier
                             .size(120.dp)
@@ -239,7 +230,7 @@ fun AddOrEditExerciseScreen(
                                 compositingStrategy = CompositingStrategy.Offscreen
                             },
                         model = ImageRequest.Builder(context)
-                            .data(dataImg)
+                            .data(uiState.imgUrl ?: R.drawable.photo_placeholder)
                             .crossfade(true)
                             .build(),
                         contentDescription = "icon",
@@ -307,8 +298,8 @@ fun AddOrEditExerciseScreen(
                 Spacer(modifier = Modifier.size(8.dp))
                 Button(modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        viewModel.onAddOrEditUiAction(AddOrEditExerciseUiAction.OnConfirm) {
-                            navigateUp()
+                        viewModel.onAddOrEditUiAction(AddOrEditExerciseUiAction.OnConfirm) { newExercise ->
+                            navigateUp(newExercise)
                         }
                     }) {
                     Text(text = "Confirm")
@@ -316,7 +307,13 @@ fun AddOrEditExerciseScreen(
             }
         }
     }
-    if(uiState.isLoading) {
+    var isLoading by remember {
+        mutableStateOf(uiState.isLoading)
+    }
+    LaunchedEffect(uiState.isLoading) {
+        isLoading = uiState.isLoading
+    }
+    if (isLoading) {
         uiState.message?.let {
             BasicLoading(title = it)
         }

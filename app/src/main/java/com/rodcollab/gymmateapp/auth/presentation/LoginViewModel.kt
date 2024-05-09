@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.rodcollab.gymmateapp.auth.domain.model.AuthDomain
 import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
 import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.SIGN_PATH
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.passwordArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.SIGN_PATH
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.passwordArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
 import com.rodcollab.gymmateapp.core.ResultOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

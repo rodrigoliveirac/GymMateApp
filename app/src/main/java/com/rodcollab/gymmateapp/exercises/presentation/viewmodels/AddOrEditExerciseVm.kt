@@ -1,31 +1,27 @@
-package com.rodcollab.gymmateapp.exercises.presentation
+package com.rodcollab.gymmateapp.exercises.presentation.viewmodels
 
 import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.addOrEditArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.bodyPartArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.exerciseIdArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.imgUrlExerciseArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.nameExerciseArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.notesExerciseArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.addOrEditArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.bodyPartArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.exerciseIdArgs
 import com.rodcollab.gymmateapp.core.AddOrEdit
 import com.rodcollab.gymmateapp.core.FileUtils
 import com.rodcollab.gymmateapp.core.ResultOf
+import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.domain.model.ExercisesDomain
+import com.rodcollab.gymmateapp.exercises.presentation.intent.AddOrEditExerciseUiAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.util.UUID
 import javax.inject.Inject
 
@@ -53,23 +49,23 @@ class AddOrEditExerciseVm @Inject constructor(
     private val addOrEdit = checkNotNull(savedStateHandle[addOrEditArgs])
 
     private val exerciseId: String? = savedStateHandle[exerciseIdArgs]
-    private val name = savedStateHandle[nameExerciseArgs] ?: ""
-    private val imgUrl = savedStateHandle[imgUrlExerciseArgs] ?: ""
-    private val notes = savedStateHandle[notesExerciseArgs] ?: ""
 
     init {
+        val exercise = exerciseId?.let { id ->
+            domain.readExercise(id)
+        } ?: ExerciseExternal()
         _uiState.update {
             it.copy(
-                name = name,
-                imgUrl = imgUrl,
-                notes = notes,
+                name = exercise.name ?: "",
+                imgUrl = exercise.image,
+                notes = exercise.notes ?: "",
                 bodyPart = bodyPart as String,
-                addOrEditTitle = if (addOrEdit == AddOrEdit.ADD) "New exercise" else "Edit exercise"
+                addOrEditTitle = if (addOrEdit == AddOrEdit.ADD.name) "New exercise" else "Edit exercise"
             )
         }
     }
 
-    fun onAddOrEditUiAction(action: AddOrEditExerciseUiAction,navigateUp: ()-> Unit = { }) {
+    fun onAddOrEditUiAction(action: AddOrEditExerciseUiAction, navigateUp: (ExerciseExternal?) -> Unit = { }) {
         viewModelScope.launch {
             when (action) {
                 is AddOrEditExerciseUiAction.OnNameChange -> {
@@ -101,32 +97,41 @@ class AddOrEditExerciseVm @Inject constructor(
                 }
 
                 is AddOrEditExerciseUiAction.OnConfirm -> {
-                    _uiState.update {
-                        it.copy(isLoading = true, message = "Loading")
+                    withContext(Dispatchers.Main) {
+                        _uiState.update {
+                            it.copy(isLoading = true, message = "Loading")
+                        }
                     }
-                   // val storageBucket = getStorageBucket()
-                    val img:String? = if(_uiState.value.imgUrl == "imgUrl") null else _uiState.value.imgUrl
-                    domain.addExercise(
+                    domain.addOrEditExercise(
                         bodyPart = _uiState.value.bodyPart,
                         document = exerciseId,
                         name = _uiState.value.name,
-                        img = img,
+                        img = _uiState.value.imgUrl,
                         notes = _uiState.value.notes
                     ) { resultOf ->
                         when (resultOf) {
                             is ResultOf.Success -> {
-                                _uiState.update {
-                                    it.copy(isLoading = false, message = "Exercise Saved")
+                                withContext(Dispatchers.Main) {
+                                    _uiState.update {
+                                        it.copy(isLoading = false, message = "Exercise Saved")
+                                    }
+                                    _uiState.update {
+                                        it.copy(message = null)
+                                    }
+                                    navigateUp(resultOf.value)
                                 }
-                                _uiState.update {
-                                    it.copy(message = null)
-                                }
-                                navigateUp()
                             }
+
                             is ResultOf.Failure -> {
-                                _uiState.update {
-                                    it.copy(isLoading = false, message = resultOf.message)
+                                withContext(Dispatchers.Main) {
+                                    _uiState.update {
+                                        it.copy(isLoading = false, message = resultOf.message)
+                                    }
+                                    _uiState.update {
+                                        it.copy(message = null)
+                                    }
                                 }
+
                             }
 
                             else -> {
@@ -139,16 +144,6 @@ class AddOrEditExerciseVm @Inject constructor(
         }
     }
 
-    private fun getStorageBucket(): String {
-
-        val jsonString = application.openFileInput("google-services.json").bufferedReader().use {
-            it.readText()
-        }
-        val json = JSONObject(jsonString)
-        val projectInfo = json.getJSONObject("project_info") as JSONObject
-        return projectInfo.getString("storage_bucket")
-    }
-
     private suspend fun getUri(data: Any?): String? {
         return withContext(Dispatchers.IO) {
             when (data) {
@@ -157,7 +152,9 @@ class AddOrEditExerciseVm @Inject constructor(
                         FileUtils.saveBitmapToFile(
                             application,
                             bitmap,
-                            "${_uiState.value.bodyPart}:${_uiState.value.name}:${UUID.randomUUID().toString()}"
+                            "${_uiState.value.bodyPart}:${_uiState.value.name}:${
+                                UUID.randomUUID().toString()
+                            }"
                         )
                     }
                 }
@@ -168,13 +165,5 @@ class AddOrEditExerciseVm @Inject constructor(
             }
         }
     }
-}
-
-sealed interface AddOrEditExerciseUiAction {
-    data class OnNameChange(val name: String) : AddOrEditExerciseUiAction
-    data class OnImgBitmapChange(val data: Any?, val uploadFile: (String) -> Unit) : AddOrEditExerciseUiAction
-    data class OnNotesChange(val notes: String) : AddOrEditExerciseUiAction
-    data object OnDelete : AddOrEditExerciseUiAction
-    data object OnConfirm : AddOrEditExerciseUiAction
 }
 

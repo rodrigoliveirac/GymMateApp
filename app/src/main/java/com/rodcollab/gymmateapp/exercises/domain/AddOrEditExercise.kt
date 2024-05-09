@@ -10,6 +10,6 @@ interface AddOrEditExercise {
         name: String,
         img: String?,
         notes: String,
-        onResult: (ResultOf<ExerciseExternal>) -> Unit
+        onResult: suspend (ResultOf<ExerciseExternal>) -> Unit
     )
 }

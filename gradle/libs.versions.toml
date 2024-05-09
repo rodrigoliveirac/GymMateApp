@@ -23,10 +23,19 @@ hiltTest = "2.49"
 mockitoKotlin = "5.3.1"
 gson = "2.8.2"
 room = "2.6.1"
+roomTest = "2.4.0"
 worker = "2.9.0"
 coroutinesCore = "1.8.1-Beta"
+coreKtxVersion = "1.5.0"
+junitKtx = "1.1.5"
+runner = "1.6.0-alpha07"
+roboeletric = "4.12"
 
 [libraries]
+roboeletric = { group = "org.robolectric", name = "robolectric", version.ref = "roboeletric"}
+android-test-rules = { group = "androidx.test", name = "rules", version.ref = "coreKtxVersion"}
+android-test-core = { group = "androidx.test", name = "core", version.ref = "coreKtxVersion"}
+androidTestRunner = { group = "androidx.test", name = "runner", version.ref = "runner"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -54,6 +63,7 @@ coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-testing = { group = "androidx.room", name = "room-testing", version.ref = "roomTest"}
 
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation"}
 navigation-compose-hilt = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavCompose" }
@@ -66,6 +76,8 @@ mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", versio
 
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 dagger-hilt-test = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hiltTest"}
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -1,11 +1,13 @@
 package com.rodcollab.gymmateapp.exercises.domain
 
-import com.rodcollab.gymmateapp.core.ResultOf
-import com.rodcollab.gymmateapp.core.data.model.BodyPart
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
-import kotlinx.coroutines.flow.Flow
+import com.rodcollab.gymmateapp.exercises.data.ExercisesRepository
 
 interface ExercisesByBP {
-    suspend operator fun invoke(onResultOf: (ResultOf<Map<BodyPart,List<ExerciseExternal>>>)-> Unit)
-    suspend fun myExercises(bodyPart: String,onResultOf: suspend (ResultOf<List<ExerciseExternal>>)-> Unit)
+    suspend operator fun invoke(bodyPart: String) : List<ExerciseExternal>
+}
+
+class ExercisesByBPImpl(private val exercisesRepository: ExercisesRepository) : ExercisesByBP {
+    override suspend fun invoke(bodyPart: String): List<ExerciseExternal> = exercisesRepository.getExerciseByBPCache(bodyPart)
+
 }
