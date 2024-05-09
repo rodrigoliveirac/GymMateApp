@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -50,6 +51,7 @@ import coil.request.ImageRequest
 import com.rodcollab.gymmateapp.R
 import com.rodcollab.gymmateapp.core.data.model.ExerciseExternal
 import com.rodcollab.gymmateapp.exercises.presentation.intent.ExercisesUiAction
+import com.rodcollab.gymmateapp.exercises.presentation.viewmodels.ExercisesUiState
 import com.rodcollab.gymmateapp.exercises.presentation.viewmodels.ExercisesVm
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,33 +98,49 @@ fun ExercisesScreen(
                 })
         }
     ) { paddingValues ->
-        Box(
-            Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            if (uiState.isLoading) {
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .align(Alignment.Center),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "Loading")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    CircularProgressIndicator(strokeWidth = 2.dp)
-                }
-            } else {
-                ExerciseList(uiState.exercises) { id ->
-                    viewModel.onUiActions(
-                        ExercisesUiAction.ExerciseDetails(
-                            id
-                        ), goTo
-                    )
-                }
-            }
+        ExerciseContent(paddingValues, uiState) { id ->
+            viewModel.onUiActions(
+                ExercisesUiAction.ExerciseDetails(
+                    id
+                ), goTo
+            )
         }
+    }
+}
+
+@Composable
+private fun ExerciseContent(
+    paddingValues: PaddingValues,
+    uiState: ExercisesUiState,
+    goTo: (String) -> Unit
+) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        if (uiState.isLoading) {
+            LoadingScreen(
+                Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center)
+            )
+        } else {
+            ExerciseList(uiState.exercises, goTo)
+        }
+    }
+}
+
+@Composable
+private fun LoadingScreen(modifier: Modifier = Modifier) {
+    Column(
+        modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Loading")
+        Spacer(modifier = Modifier.size(8.dp))
+        CircularProgressIndicator(strokeWidth = 2.dp)
     }
 }
 
