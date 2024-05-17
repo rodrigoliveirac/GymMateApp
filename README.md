@@ -13,6 +13,11 @@
 - Users can add, delete, and edit exercises.
 - Users can register a new account and then sign in.
 - Users can only access their own exercises using their user ID.
+
+# NOTE 🚨
+``
+To run this application make sure you have setup your own Firebase Firestore in your console and addedl the "google-services.json" file to your app module
+``
    
 ### Technologies
 
