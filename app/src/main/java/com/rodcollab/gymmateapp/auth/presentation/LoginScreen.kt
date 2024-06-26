@@ -1,6 +1,7 @@
 package com.rodcollab.gymmateapp.auth.presentation
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,7 +65,7 @@ fun AuthScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 navigationIcon = {
                          if(uiState.displayArrowBack) {
                              IconButton(onClick = { goTo(null) }) {
@@ -70,14 +73,18 @@ fun AuthScreen(
                              }
                          }
                 },
-                modifier = Modifier.shadow(elevation = 6.dp),
                 title = {
-                    Text(text = stringResource(id = uiState.signPath.topBarTitle))
+                    Text(
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.headlineSmall,
+                        text = stringResource(id = uiState.signPath.topBarTitle)
+                    )
                 })
         }
     ) { paddingValues ->
         Box(modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary)
             .padding(paddingValues)) {
 
             uiState.apply {

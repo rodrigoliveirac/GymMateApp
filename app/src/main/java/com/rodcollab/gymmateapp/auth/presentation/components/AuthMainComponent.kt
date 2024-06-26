@@ -3,37 +3,35 @@ package com.rodcollab.gymmateapp.auth.presentation.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.rodcollab.gymmateapp.R
 import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
+import com.rodcollab.gymmateapp.core.ui.GymMateTextField
+import com.rodcollab.gymmateapp.core.ui.PasswordTextField
+import com.rodcollab.gymmateapp.core.ui.RepeatPasswordTextField
 
 @Composable
 fun AuthMainComponent(
@@ -44,8 +42,10 @@ fun AuthMainComponent(
     password: String,
     repeatPassword: String?,
     showPassword: Boolean,
-    onAuthUiAction: (AuthUiAction) -> Unit
+    onAuthUiAction: (AuthUiAction) -> Unit,
 ) {
+    val isSignUp by remember { mutableStateOf(repeatPassword != null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,71 +53,41 @@ fun AuthMainComponent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            modifier = Modifier.clip(CircleShape),
-            painter = painterResource(id = R.drawable.ic_logo),
-            contentDescription = null
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.headlineMedium,
-            text = stringResource(headlineScreen)
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = email,
-            onValueChange = { onAuthUiAction(AuthUiAction.OnEmailValueChange(it)) },
-            label = { Text(text = stringResource(R.string.auth_email_label)) },
-            placeholder = { Text(text = stringResource(R.string.auth_email_placeholder)) },
-            leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = null) }
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = password,
-            onValueChange = { onAuthUiAction(AuthUiAction.OnPasswordValueChange(it)) },
-            label = { Text(text = stringResource(R.string.auth_password_label)) },
-            placeholder = { Text(text = stringResource(R.string.auth_password_placeholder)) },
-            visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = null) },
-            trailingIcon = {
-                IconButton(onClick = { onAuthUiAction(AuthUiAction.OnShowPasswordClick) }) {
-                    Icon(
-                        painter = painterResource(id = if (showPassword) R.drawable.ic_eye_close else R.drawable.ic_eye_open),
-                        contentDescription = null
-                    )
-                }
-            }
-        )
-        repeatPassword?.let {
-            Spacer(modifier = Modifier.size(16.dp))
-            TextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = it,
-                onValueChange = { onAuthUiAction(AuthUiAction.OnRepeatPasswordValueChange(it)) },
-                label = { Text(text = stringResource(R.string.auth_repeat_password_label)) },
-                placeholder = { Text(text = stringResource(R.string.auth_password_placeholder)) },
-                visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = null
-                    )
-                },
-                trailingIcon = {
-                    IconButton(onClick = { onAuthUiAction(AuthUiAction.OnShowPasswordClick) }) {
-                        Icon(
-                            painter = painterResource(id = if (showPassword) R.drawable.ic_eye_close else R.drawable.ic_eye_open),
-                            contentDescription = null
-                        )
-                    }
-                }
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.displaySmall,
+                text = stringResource(headlineScreen)
             )
+            Spacer(modifier = Modifier.size(8.dp))
+            Image(
+                modifier = Modifier.size(40.dp),
+                painter = painterResource(id = if (!isSignUp) R.drawable.greeting_hand else R.drawable.flexed_biceps),
+                contentDescription = null
+            )
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        GymMateTextField(
+            text = email,
+            label = R.string.auth_email_placeholder,
+            icon = Icons.Default.Email
+        ) { newEmailValue -> onAuthUiAction(AuthUiAction.OnEmailValueChange(newEmailValue)) }
+        Spacer(modifier = Modifier.size(16.dp))
+
+        PasswordTextField(
+            text = password,
+            showPassword = showPassword,
+            onChangeVisibility = { onAuthUiAction(AuthUiAction.OnShowPasswordClick) }
+        ) { newPasswordValue -> onAuthUiAction(AuthUiAction.OnPasswordValueChange(newPasswordValue)) }
+
+        if (isSignUp) {
+            Spacer(modifier = Modifier.size(16.dp))
+            RepeatPasswordTextField(
+                text = repeatPassword!!,
+                showPassword = showPassword,
+                onChangeVisibility = { onAuthUiAction(AuthUiAction.OnShowPasswordClick) }
+            ) { newPasswordValue -> onAuthUiAction(AuthUiAction.OnPasswordValueChange(newPasswordValue)) }
         }
         Spacer(modifier = Modifier.size(16.dp))
         Button(modifier = Modifier.fillMaxWidth(),
@@ -128,7 +98,11 @@ fun AuthMainComponent(
         TextButton(
             modifier = Modifier.alpha(if (displayToSignUpBtn) 1.0f else 0f),
             onClick = { onAuthUiAction(AuthUiAction.GoToSignUp) }) {
-            Text(text = stringResource(R.string.auth_create_account_text_button))
+            Text(
+                color = MaterialTheme.colorScheme.onPrimary,
+                text = stringResource(R.string.auth_create_account_text_button),
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }

@@ -10,7 +10,7 @@ sealed class SignPath(open val topBarTitle: Int, open val headlineScreen: Int, o
     ) : SignPath(topBarTitle,headlineScreen,confirmBtnText)
     data class SignUp(
         override val topBarTitle: Int = R.string.sign_up,
-        override val headlineScreen: Int = R.string.auth_creating_account_text,
+        override val headlineScreen: Int = R.string.auth_new_account_text,
         override val confirmBtnText: Int = R.string.auth_sign_up
     ) : SignPath(topBarTitle, headlineScreen, confirmBtnText)
 

@@ -21,6 +21,7 @@ kotlinxCoroutinesTest = "1.8.1-Beta"
 gmsGoogleServices = "4.4.0"
 hiltTest = "2.49"
 mockitoKotlin = "5.3.1"
+googleFonts = "1.3.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,7 +52,7 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito"}
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin"}
-
+google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts"}
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 dagger-hilt-test = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hiltTest"}
 
