@@ -91,6 +91,7 @@ fun AuthScreen(
                 AuthMainComponent(
                     displayToSignUpBtn = uiState.displayToSignUpBtn,
                     confirmBtnText = uiState.signPath.confirmBtnText,
+                    externalAccountBtn = uiState.signPath.externalAccount,
                     headlineScreen = uiState.signPath.headlineScreen,
                     email = email,
                     password = password,

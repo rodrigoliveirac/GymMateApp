@@ -15,4 +15,7 @@
     <string name="loading_data_account">Loading Data Account</string>
     <string name="saving_new_data_account">Saving New Data Account</string>
     <string name="empty_text">\"\"</string>
+    <string name="auth_login_google_account">Login with Google</string>
+    <string name="auth_sign_up_google_account">Sign up with Google</string>
+    <string name="forgot_your_password">Forgot your password?</string>
 </resources>
