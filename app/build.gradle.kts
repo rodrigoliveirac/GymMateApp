@@ -17,7 +17,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "com.rodcollab.gymmateapp.exercises.ExercisesDomainTest"
+        testInstrumentationRunner = "com.rodcollab.gymmateapp.GymMateTestRunner"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -26,13 +26,12 @@ android {
     testOptions {
         unitTests {
             unitTests.isReturnDefaultValues = true
-            unitTests.isIncludeAndroidResources = true
         }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -69,8 +68,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.core.ktx)
-    implementation(libs.androidx.junit.ktx)
+    //implementation(libs.core.ktx)
+   // implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit)
     testImplementation(libs.roboeletric)
     androidTestImplementation(libs.androidx.junit)
@@ -82,7 +81,6 @@ dependencies {
     androidTestImplementation(libs.android.test.rules)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.google.fonts)
 
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
@@ -116,4 +114,6 @@ dependencies {
 
     implementation(libs.worker.coroutines)
     implementation(libs.coroutines.core)
+
+    implementation(libs.google.fonts)
 }

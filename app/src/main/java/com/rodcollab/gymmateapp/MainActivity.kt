@@ -8,12 +8,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.rodcollab.gymmateapp.ui.theme.GymMateAppTheme
+import com.rodcollab.gymmateapp.core.ui.theme.GymMateAppTheme
 import com.rodcollab.gymmateapp.auth.presentation.AuthScreen
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.SIGNIN_ROUTE
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinations.SIGNUP_ROUTE
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations.SIGNIN_ROUTE
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinations.SIGNUP_ROUTE
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
