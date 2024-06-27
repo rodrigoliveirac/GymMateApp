@@ -82,6 +82,7 @@ dependencies {
     androidTestImplementation(libs.android.test.rules)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.google.fonts)
 
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
