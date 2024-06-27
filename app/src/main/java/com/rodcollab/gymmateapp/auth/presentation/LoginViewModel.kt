@@ -6,17 +6,19 @@ import androidx.lifecycle.viewModelScope
 import com.rodcollab.gymmateapp.auth.domain.model.AuthDomain
 import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
 import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.SIGN_PATH
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateDestinationsArgs.passwordArgs
-import com.rodcollab.gymmateapp.auth.presentation.navigation.GymMateScreens
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.SIGN_PATH
+import com.rodcollab.gymmateapp.core.navigation.GymMateDestinationsArgs.passwordArgs
+import com.rodcollab.gymmateapp.core.navigation.GymMateScreens
 import com.rodcollab.gymmateapp.core.ResultOf
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -72,32 +74,34 @@ class LoginViewModel @Inject constructor(
                                 message = getResourceId()
                             )
                         }
-                        authDomain.authenticate(
-                            email = email,
-                            password = password,
-                            repeatPassword = repeatPassword,
-                            signPath = signPath,
-                            onResult = { resultOf ->
-                                when (resultOf) {
-                                    is ResultOf.Success -> {
-                                        navigateToScreen(getRoute())
-                                    }
+                        withContext(Dispatchers.IO) {
+                            authDomain.authenticate(
+                                email = email,
+                                password = password,
+                                repeatPassword = repeatPassword,
+                                signPath = signPath,
+                                onResult = { resultOf ->
+                                    when (resultOf) {
+                                        is ResultOf.Success -> {
+                                            navigateToScreen(getRoute())
+                                        }
 
-                                    is ResultOf.Failure -> {
-                                        _uiState.update { currentUiState ->
-                                            currentUiState.copy(
-                                                displaySnackbar = true,
-                                                isLoading = false,
-                                                message = resultOf.message.toString()
-                                            )
+                                        is ResultOf.Failure -> {
+                                            _uiState.update { currentUiState ->
+                                                currentUiState.copy(
+                                                    displaySnackbar = true,
+                                                    isLoading = false,
+                                                    message = resultOf.message.toString()
+                                                )
+                                            }
+                                        }
+                                        else -> {
+                                            print("another")
                                         }
                                     }
-                                    else -> {
-
-                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
 
