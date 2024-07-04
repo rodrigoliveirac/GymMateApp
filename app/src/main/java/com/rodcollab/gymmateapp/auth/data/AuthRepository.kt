@@ -7,4 +7,5 @@ interface AuthRepository {
     suspend fun signInWithEmailAndPassword(email: String, password:String, onResult: (ResultOf<User>) -> Unit)
     suspend fun createUserWithEmailAndPassword(email: String, password: String, onResult: (ResultOf<User>) -> Unit)
     suspend fun sendPasswordResetEmail(email: String, onResult: (ResultOf<String>) -> Unit)
+    suspend fun signInGoogle(tokenId: String?, onResult: (ResultOf<User>) -> Unit)
 }

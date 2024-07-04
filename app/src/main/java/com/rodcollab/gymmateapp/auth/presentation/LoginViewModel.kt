@@ -1,8 +1,11 @@
 package com.rodcollab.gymmateapp.auth.presentation
 
+import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.rodcollab.gymmateapp.BuildConfig
 import com.rodcollab.gymmateapp.auth.domain.model.AuthDomain
 import com.rodcollab.gymmateapp.auth.domain.usecase.enums.SignPath
 import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
@@ -33,6 +36,15 @@ class LoginViewModel @Inject constructor(
 
     private val _uiState: MutableStateFlow<AuthUiState> = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    private val googleIdOption: GetGoogleIdOption by lazy {
+         GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(true)
+            .setServerClientId(BuildConfig.CLIENT_ID)
+            .setAutoSelectEnabled(true)
+            //.setNonce(<nonce string to use when generating a Google ID token>)
+            .build()
+    }
 
     init {
         _uiState.update { currentUiState ->
@@ -76,9 +88,7 @@ class LoginViewModel @Inject constructor(
                         }
                         withContext(Dispatchers.IO) {
                             authDomain.authenticate(
-                                email = email,
-                                password = password,
-                                repeatPassword = repeatPassword,
+                                authType = action.authType,
                                 signPath = signPath,
                                 onResult = { resultOf ->
                                     when (resultOf) {
@@ -111,18 +121,27 @@ class LoginViewModel @Inject constructor(
                     }
                 }
 
-                is AuthUiAction.GoToSignUp -> {
-                    navigateToScreen("${GymMateScreens.AUTH_SCREEN}/${SIGN_UP}")
-                }
-
                 is AuthUiAction.OnRepeatPasswordValueChange -> {
                     _uiState.update {
                         it.copy(repeatPassword = action.repeatPassword)
                     }
                 }
+                is AuthUiAction.GoToSignUp -> {
+                    navigateToScreen("${GymMateScreens.AUTH_SCREEN}/${SIGN_UP}")
+                }
             }
         }
     }
+
+    fun prepareRequest(launchAnotherActivity: (GetCredentialRequest)-> Unit) {
+        viewModelScope.launch {
+            val request: GetCredentialRequest = GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build()
+            launchAnotherActivity(request)
+        }
+    }
+
     fun hideSnackBar() {
         viewModelScope.launch {
             _uiState.update { currentUiState ->
@@ -134,7 +153,7 @@ class LoginViewModel @Inject constructor(
     }
     private fun AuthUiState.getRoute() = when (signPath) {
         is SignPath.SignIn -> {
-            GymMateScreens.MAIN_SCREEN
+            GymMateScreens.ONBOARDING_SCREEN
         }
         else -> {
             "${GymMateScreens.AUTH_SCREEN}/$SIGN_IN?${GymMateDestinationsArgs.emailArgs}=$email?$passwordArgs=$password"

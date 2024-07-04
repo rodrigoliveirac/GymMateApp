@@ -31,6 +31,11 @@ junitKtx = "1.1.5"
 runner = "1.6.0-alpha07"
 roboeletric = "4.12"
 googleFonts  = "1.3.2"
+googleAuth = "21.2.0"
+appcompat = "1.7.0"
+credentials = "1.2.2"
+googleIdentity = "1.1.1"
+
 
 [libraries]
 roboeletric = { group = "org.robolectric", name = "robolectric", version.ref = "roboeletric"}
@@ -79,6 +84,11 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 dagger-hilt-test = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hiltTest"}
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+google-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "googleAuth"}
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+credentials-service = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials"}
+google-identity = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleIdentity"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -9,37 +9,44 @@ class UserAuthImpl(
     private val emailAndPasswordValidator: EmailAndPasswordValidator
 ) : UserAuth {
     override suspend fun invoke(
-        email: String,
-        password: String,
-        repeatPassword: String?,
+        authType: AuthType,
         signPath: SignPath,
         onResult: (ResultOf<User>) -> Unit
     ) {
-        emailAndPasswordValidator(email, password, repeatPassword) { resultOf ->
-            when (resultOf) {
-                is ResultOf.Failure -> {
-                    onResult(resultOf)
-                }
+        when(authType) {
+            is AuthType.EmailAndPassword -> {
+                authType.apply {
+                    emailAndPasswordValidator(email, password, repeatPassword) { resultOf ->
+                        when (resultOf) {
+                            is ResultOf.Failure -> {
+                                onResult(resultOf)
+                            }
 
-                is ResultOf.Success -> {
-                    when (signPath) {
-                        is SignPath.SignIn -> {
-                            authRepository.signInWithEmailAndPassword(email, password, onResult)
-                        }
+                            is ResultOf.Success -> {
+                                when (signPath) {
+                                    is SignPath.SignIn -> {
+                                        authRepository.signInWithEmailAndPassword(email, password, onResult)
+                                    }
 
-                        is SignPath.SignUp -> {
-                            authRepository.createUserWithEmailAndPassword(
-                                email,
-                                password,
-                                onResult
-                            )
+                                    is SignPath.SignUp -> {
+                                        authRepository.createUserWithEmailAndPassword(
+                                            email,
+                                            password,
+                                            onResult
+                                        )
+                                    }
+                                }
+                            }
+
+                            else -> {
+                                ResultOf.Idle
+                            }
                         }
                     }
                 }
-
-                else -> {
-                    ResultOf.Idle
-                }
+            }
+            is AuthType.GoogleSignIn -> {
+                authRepository.signInGoogle(authType.tokenId) { resultOf -> onResult(resultOf) }
             }
         }
     }

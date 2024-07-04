@@ -23,7 +23,7 @@ fun NavGraphBuilder.authGraph(navController: NavController) {
             nullable = true
         })
     ) {
-        AuthScreen { route ->
+        AuthScreen() { route ->
             route?.let {
                 navController.navigate(it) {
                     if (route == GymMateScreens.MAIN_SCREEN) {
@@ -39,7 +39,7 @@ fun NavGraphBuilder.authGraph(navController: NavController) {
             type = NavType.StringType
         })
     ) {
-        AuthScreen { route ->
+        AuthScreen() { route ->
             route?.let {
                 navController.navigate(it) {
                     popUpTo(navController.previousBackStackEntry?.destination?.route.toString()) {

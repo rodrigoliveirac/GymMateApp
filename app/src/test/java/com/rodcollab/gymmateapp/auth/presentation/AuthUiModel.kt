@@ -42,9 +42,7 @@ class AuthUiModel(dispatcherProvider: CoroutineDispatcher, private val authDomai
                     _uiState.value.apply {
                         fakeSavedStateHandle[SIGN_PATH]?.let { signPath ->
                             authDomain.authenticate(
-                                email = email,
-                                password = password,
-                                repeatPassword = repeatPassword,
+                                action.authType,
                                 signPath = SignPath.getSignPath(signPath),
                                 onResult = { resultOf ->
                                     updateWith(_uiState.value.copy(isLoading = false))

@@ -1,5 +1,10 @@
 package com.rodcollab.gymmateapp.auth.presentation
 
+import android.app.Activity
+import android.content.ContentValues.TAG
+import android.content.Context
+import android.content.ContextWrapper
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,11 +38,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,11 +53,29 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.rodcollab.gymmateapp.R
+import com.rodcollab.gymmateapp.auth.domain.usecase.AuthType
 import com.rodcollab.gymmateapp.auth.presentation.components.AuthMainComponent
+import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
 import com.rodcollab.gymmateapp.core.ui.BasicLoading
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+fun Context.getActivityOrNull(): Activity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+
+    return null
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +86,10 @@ fun AuthScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val activity by remember { mutableStateOf(context.getActivityOrNull()) }
+    val credentialManager = CredentialManager.create(context)
+    val scope = rememberCoroutineScope()
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -89,6 +119,32 @@ fun AuthScreen(
 
             uiState.apply {
                 AuthMainComponent(
+                    signWithGoogle = {
+                        activity?.let { activity ->
+                            viewModel.prepareRequest { request ->
+                                scope.launch {
+                                    try {
+                                        val result = credentialManager.getCredential(
+                                            context = activity,
+                                            request = request
+                                        )
+                                        handleWithResult(result) { tokenId ->
+                                            viewModel.onAuthUiAction(
+                                                AuthUiAction.OnConfirmClick(
+                                                    AuthType.GoogleSignIn(
+                                                        tokenId
+                                                    )
+                                                )
+                                            ) { route ->
+                                                goTo(route)
+                                            }
+                                        }
+                                    } catch (e : GetCredentialException) {
+                                    }
+                                }
+                            }
+                        }
+                    },
                     displayToSignUpBtn = uiState.displayToSignUpBtn,
                     confirmBtnText = uiState.signPath.confirmBtnText,
                     externalAccountBtn = uiState.signPath.externalAccount,
@@ -112,6 +168,24 @@ fun AuthScreen(
         }
     }
 }
+
+private fun handleWithResult(
+    result: GetCredentialResponse,
+    onLogin:(String)-> Unit,
+) {
+    if (result.credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+        try {
+            val googleIdTokenCredential = GoogleIdTokenCredential
+                .createFrom(result.credential.data).idToken
+            onLogin(googleIdTokenCredential)
+        } catch (e: GoogleIdTokenParsingException) {
+            Log.e(TAG, "Received an invalid google id token response", e)
+        }
+    } else {
+        Log.e(TAG, "Unexpected type of credential")
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable

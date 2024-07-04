@@ -17,6 +17,7 @@ import com.rodcollab.gymmateapp.core.navigation.GymMateScreens.TRAININGS
  * Screens used in [GymMateDestinations]
  */
 internal object GymMateScreens {
+    const val ONBOARDING_SCREEN = "onboarding_screen"
     const val MAIN_SCREEN = "main"
     const val AUTH_SCREEN = "authentication"
     const val EXERCISES = "exercises"

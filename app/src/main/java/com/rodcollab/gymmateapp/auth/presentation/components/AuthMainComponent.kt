@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.rodcollab.gymmateapp.R
+import com.rodcollab.gymmateapp.auth.domain.usecase.AuthType
 import com.rodcollab.gymmateapp.auth.presentation.intent.AuthUiAction
 import com.rodcollab.gymmateapp.core.ui.GymMateTextField
 import com.rodcollab.gymmateapp.core.ui.PasswordTextField
@@ -38,6 +39,7 @@ import com.rodcollab.gymmateapp.core.ui.RepeatPasswordTextField
 
 @Composable
 fun AuthMainComponent(
+    signWithGoogle: ()-> Unit,
     displayToSignUpBtn: Boolean,
     confirmBtnText: Int,
     externalAccountBtn: Int,
@@ -120,7 +122,7 @@ fun AuthMainComponent(
             modifier = Modifier
             .fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
-            onClick = { onAuthUiAction(AuthUiAction.OnConfirmClick) }) {
+            onClick = { onAuthUiAction(AuthUiAction.OnConfirmClick(AuthType.EmailAndPassword(email, password, repeatPassword))) }) {
             Text(color = MaterialTheme.colorScheme.primary,text = stringResource(confirmBtnText))
         }
         Spacer(modifier = Modifier.size(8.dp))
@@ -132,7 +134,9 @@ fun AuthMainComponent(
             .fillMaxWidth(),
             shape = RoundedCornerShape(8.dp),
             elevation = ButtonDefaults.buttonElevation(4.dp),
-            onClick = {  }) {
+            onClick =
+                signWithGoogle
+            ) {
             Image(modifier = Modifier.size(24.dp), painter = painterResource(id = R.drawable.ic_google), contentDescription = null)
             Spacer(modifier = Modifier.size(8.dp))
             Text(color = MaterialTheme.colorScheme.onPrimary,

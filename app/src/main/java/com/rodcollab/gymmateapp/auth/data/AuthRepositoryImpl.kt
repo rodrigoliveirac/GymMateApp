@@ -2,6 +2,7 @@ package com.rodcollab.gymmateapp.auth.data
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.rodcollab.gymmateapp.auth.domain.model.User
 import com.rodcollab.gymmateapp.core.ResultOf
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +64,6 @@ class AuthRepositoryImpl(private val firebaseAuth: FirebaseAuth) :
                 onResult(ResultOf.Failure(message = e.message, throwable = e.cause))
                 Log.i(FIREBASE_SIGNUP, "Registered unsuccessfully")
             }
-
     }
 
     override suspend fun sendPasswordResetEmail(
@@ -84,10 +84,37 @@ class AuthRepositoryImpl(private val firebaseAuth: FirebaseAuth) :
         }
     }
 
+    override suspend fun signInGoogle(tokenId: String?, onResult: (ResultOf<User>) -> Unit) {
+        withContext(Dispatchers.IO) {
+            val credential = GoogleAuthProvider.getCredential(tokenId, null)
+            firebaseAuth.signInWithCredential(credential)
+                .addOnSuccessListener { authResult ->
+                    Log.d(FIREBASE_SIGN_IN_GOOGLE, "signInWithCredential:success")
+                    val user = authResult.user?.run {
+                        User(
+                            uuid = uid,
+                            email = email,
+                            password = credential.provider,
+                        )
+                    }
+                    try {
+                        onResult(ResultOf.Success(user!!))
+                    } catch (e:Exception) {
+                        onResult(ResultOf.Failure(message = e.message, throwable = e))
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.w(FIREBASE_SIGN_IN_GOOGLE, "signInWithCredential:failure", e)
+                    onResult(ResultOf.Failure(message = e.message, throwable = e))
+                }
+        }
+    }
+
     companion object {
         private const val FIREBASE_LOGIN = "FIREBASE_LOGIN"
         private const val FIREBASE_SIGNUP = "FIREBASE_SIGNUP"
         private const val FIREBASE_RESET_PASSWORD = "FIREBASE_RESET_PASSWORD"
+        private const val FIREBASE_SIGN_IN_GOOGLE = "FIREBASE_SIGN_IN_GOOGLE"
     }
 
 }
